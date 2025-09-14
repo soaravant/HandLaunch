@@ -87,7 +87,11 @@
         img.alt = app.name;
         img.style.width = '20px';
         img.style.height = '20px';
+        img.onload = function() {
+          console.log('Icon loaded successfully:', app.icon);
+        };
         img.onerror = function() {
+          console.error('Failed to load icon:', app.icon);
           // Fallback to a generic app icon if the specific icon fails to load
           this.style.display = 'none';
           iconEl.innerHTML = '<div style="width: 20px; height: 20px; background: #666; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white;">📱</div>';
