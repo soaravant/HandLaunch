@@ -112,17 +112,9 @@ class GestureListWidget(QWidget):
             item.setText(f"{gesture_data['name']} ({gesture_data['confidence']:.1f})")
             item.setData(Qt.UserRole, gesture_id)
             
-            # Set gesture icon (prefer PNG, fallback to SVG)
-            png_path = self.icon_path / f"{gesture_id}.png"
-            svg_path = self.icon_path / f"{gesture_id}.svg"
-            if png_path.exists():
-                item.setIcon(QIcon(str(png_path)))
-                logger.debug(f"Set icon for {gesture_id}: {png_path}")
-            elif svg_path.exists():
-                item.setIcon(QIcon(str(svg_path)))
-                logger.debug(f"Set icon for {gesture_id}: {svg_path}")
-            else:
-                logger.warning(f"Gesture icon not found: {png_path} or {svg_path}")
+            # Set gesture icon using emoji
+            item.setIcon(self._get_gesture_emoji_icon(gesture_id))
+            logger.debug(f"Set gesture emoji icon for {gesture_id}")
             
             # Set item properties based on enabled state
             if gesture_data['enabled']:
@@ -201,3 +193,44 @@ class GestureListWidget(QWidget):
     def get_enabled_gestures(self) -> dict:
         """Get only enabled gestures."""
         return {k: v for k, v in self.gestures.items() if v.get('enabled', True)}
+    
+    def _get_gesture_emoji_icon(self, gesture_id: str):
+        """Get emoji icon for gesture."""
+        from PyQt5.QtGui import QFont, QPixmap, QPainter, QIcon
+        from PyQt5.QtCore import Qt
+        
+        emoji_map = {
+            "open_palm": "✋",
+            "fist": "✊", 
+            "peace_sign": "✌️",
+            "thumbs_up": "👍",
+            "pointing": "👆"
+        }
+        
+        emoji = emoji_map.get(gesture_id, "❓")
+        
+        # Create a pixmap with the emoji
+        pixmap = QPixmap(24, 24)
+        pixmap.fill(Qt.transparent)
+        
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.Antialiasing)
+        
+        # Set font for emoji (force color emoji font per OS)
+        import platform as _plt
+        font = QFont()
+        os_name = _plt.system()
+        if os_name == "Darwin":
+            font.setFamily("Apple Color Emoji")
+        elif os_name == "Windows":
+            font.setFamily("Segoe UI Emoji")
+        else:
+            font.setFamily("Noto Color Emoji")
+        font.setPointSize(16)
+        painter.setFont(font)
+        
+        # Draw emoji centered
+        painter.drawText(pixmap.rect(), Qt.AlignCenter, emoji)
+        painter.end()
+        
+        return QIcon(pixmap)

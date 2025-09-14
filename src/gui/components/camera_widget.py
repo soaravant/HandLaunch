@@ -123,15 +123,12 @@ class CameraWidget(QWidget):
                     # Draw hint icon + label to the right of timer
                     # Use gesture hint if available
                     if getattr(self, 'hint_gesture_name', None):
-                        from PyQt5.QtGui import QIcon
-                        from pathlib import Path
-                        icon_path = Path(__file__).parent.parent.parent.parent / "resources" / "icons" / f"{self.hint_gesture_name}.png"
                         text_x = margin + radius*2 + 10
-                        if icon_path.exists():
-                            icon = QIcon(str(icon_path))
-                            hint_pix = icon.pixmap(24, 24)
-                            painter.drawPixmap(text_x, margin + radius - 12, hint_pix)
-                            text_x += 28
+                        # Draw emoji icon
+                        emoji_icon = self._get_gesture_emoji_icon(self.hint_gesture_name)
+                        hint_pix = emoji_icon.pixmap(24, 24)
+                        painter.drawPixmap(text_x, margin + radius - 12, hint_pix)
+                        text_x += 28
                         painter.setPen(QColor(255,255,255))
                         painter.drawText(text_x, margin + radius + 6, self.hint_gesture_name.replace('_',' ').title())
                     painter.end()
@@ -177,16 +174,12 @@ class CameraWidget(QWidget):
                 painter.begin(QImage(overlay_frame.data, w, h, w*3, QImage.Format_RGB888))
                 painter.setRenderHint(QPainter.Antialiasing)
                 margin = 12
-                # Icon from resources/icons/<gesture>.png
+                # Draw emoji icon for gesture
                 gesture_name, confidence = gestures[0]
-                icon_path = Path(__file__).parent.parent.parent.parent / "resources" / "icons" / f"{gesture_name}.png"
-                if icon_path.exists():
-                    icon = QIcon(str(icon_path))
-                    pix = icon.pixmap(24, 24)
-                    painter.drawPixmap(margin, margin, pix)
-                    text_x = margin + 28
-                else:
-                    text_x = margin
+                emoji_icon = self._get_gesture_emoji_icon(gesture_name)
+                pix = emoji_icon.pixmap(24, 24)
+                painter.drawPixmap(margin, margin, pix)
+                text_x = margin + 28
                 painter.setPen(QColor(255, 255, 255))
                 font = QFont()
                 font.setPointSize(12)
@@ -252,3 +245,44 @@ class CameraWidget(QWidget):
                 font-size: 16px;
             }
         """)
+    
+    def _get_gesture_emoji_icon(self, gesture_id: str):
+        """Get emoji icon for gesture."""
+        from PyQt5.QtGui import QFont, QPixmap, QPainter, QIcon
+        from PyQt5.QtCore import Qt
+        
+        emoji_map = {
+            "open_palm": "✋",
+            "fist": "✊", 
+            "peace_sign": "✌️",
+            "thumbs_up": "👍",
+            "pointing": "👆"
+        }
+        
+        emoji = emoji_map.get(gesture_id, "❓")
+        
+        # Create a pixmap with the emoji
+        pixmap = QPixmap(24, 24)
+        pixmap.fill(Qt.transparent)
+        
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.Antialiasing)
+        
+        # Set font for emoji (force color emoji font per OS)
+        import platform as _plt
+        font = QFont()
+        os_name = _plt.system()
+        if os_name == "Darwin":
+            font.setFamily("Apple Color Emoji")
+        elif os_name == "Windows":
+            font.setFamily("Segoe UI Emoji")
+        else:
+            font.setFamily("Noto Color Emoji")
+        font.setPointSize(16)
+        painter.setFont(font)
+        
+        # Draw emoji centered
+        painter.drawText(pixmap.rect(), Qt.AlignCenter, emoji)
+        painter.end()
+        
+        return QIcon(pixmap)

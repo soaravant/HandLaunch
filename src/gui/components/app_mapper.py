@@ -120,36 +120,40 @@ class AppMapperWidget(QWidget):
                 "open_palm": "/Applications/Safari.app",
                 "fist": "/System/Library/CoreServices/Finder.app",
                 "peace_sign": "/System/Applications/TextEdit.app",
-                "thumbs_up": "/Applications/VLC.app",
+                "thumbs_up": "/System/Applications/Mail.app",
                 "pointing": "/Applications/Utilities/Terminal.app"
             }
         if sysname == "Windows":
-            # Prefer Chrome/Firefox/Edge if present; otherwise Notepad
-            candidates = [
+            # Prefer Chrome for open_palm, Firefox for peace_sign
+            chrome_candidates = [
                 "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
                 "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+            ]
+            firefox_candidates = [
                 "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
                 "C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe",
-                "msedge.exe",
             ]
             def first_existing(paths):
                 for p in paths:
-                    if p.endswith('.exe') and (os.path.exists(p) or p in ("notepad.exe","explorer.exe","calc.exe","msedge.exe")):
+                    if p.endswith('.exe') and (os.path.exists(p) or p in ("notepad.exe","explorer.exe","calc.exe","msedge.exe","wmplayer.exe")):
                         return p
                 return "notepad.exe"
-            browser = first_existing(candidates)
+            chrome = first_existing(chrome_candidates) if any(os.path.exists(p) for p in chrome_candidates) else "chrome.exe"
+            firefox = first_existing(firefox_candidates) if any(os.path.exists(p) for p in firefox_candidates) else "firefox.exe"
+            # Windows Media Player fallback executable name
+            wmp = "wmplayer.exe"
             return {
-                "open_palm": browser,
+                "open_palm": chrome,
                 "fist": "explorer.exe",
-                "peace_sign": browser,
-                "thumbs_up": "C:\\Program Files\\VideoLAN\\VLC\\vlc.exe",
+                "peace_sign": firefox,
+                "thumbs_up": wmp,
                 "pointing": "notepad.exe"
             }
         # Linux (GNOME-friendly). Commands expected on PATH.
         return {
             "open_palm": "firefox",
             "fist": "nautilus",
-            "peace_sign": "firefox",
+            "peace_sign": "google-chrome" if os.path.exists("/usr/bin/google-chrome") else "chrome",
             "thumbs_up": "vlc",
             "pointing": "gedit"
         }
@@ -177,6 +181,7 @@ class AppMapperWidget(QWidget):
                 ("Calculator", ["/System/Applications/Calculator.app", "/Applications/Calculator.app"]),
                 ("TextEdit", ["/System/Applications/TextEdit.app", "/Applications/TextEdit.app"]),
                 ("Mail", ["/System/Applications/Mail.app", "/Applications/Mail.app"]),
+                ("Notes", ["/System/Applications/Notes.app", "/Applications/Notes.app"]),
                 ("Finder", ["/System/Library/CoreServices/Finder.app"]),
                 ("Terminal", ["/Applications/Utilities/Terminal.app", "/System/Applications/Utilities/Terminal.app"]),
                 ("Activity Monitor", ["/Applications/Utilities/Activity Monitor.app"]),
@@ -233,17 +238,9 @@ class AppMapperWidget(QWidget):
             gesture_item = QTableWidgetItem(self._get_gesture_display_name(gesture))
             gesture_item.setFlags(gesture_item.flags() & ~Qt.ItemIsEditable)
             
-            # Set gesture icon (prefer PNG, fallback to SVG)
-            png_path = self.icon_path / f"{gesture}.png"
-            svg_path = self.icon_path / f"{gesture}.svg"
-            if png_path.exists():
-                gesture_item.setIcon(QIcon(str(png_path)))
-                logger.debug(f"Set gesture icon for {gesture}: {png_path}")
-            elif svg_path.exists():
-                gesture_item.setIcon(QIcon(str(svg_path)))
-                logger.debug(f"Set gesture icon for {gesture}: {svg_path}")
-            else:
-                logger.warning(f"Gesture icon not found: {png_path} or {svg_path}")
+            # Set gesture icon using emoji
+            gesture_item.setIcon(self._get_gesture_emoji_icon(gesture))
+            logger.debug(f"Set gesture emoji icon for {gesture}")
             
             self.mappings_table.setItem(row, 0, gesture_item)
             
@@ -276,6 +273,48 @@ class AppMapperWidget(QWidget):
             "pointing": "Pointing"
         }
         return display_names.get(gesture_id, gesture_id)
+    
+    def _get_gesture_emoji_icon(self, gesture_id: str):
+        """Get emoji icon for gesture."""
+        from PyQt5.QtGui import QFont, QPixmap, QPainter, QIcon
+        from PyQt5.QtCore import Qt
+        
+        emoji_map = {
+            "open_palm": "✋",
+            "fist": "✊", 
+            "peace_sign": "✌️",
+            "thumbs_up": "👍",
+            "pointing": "👆"
+        }
+        
+        emoji = emoji_map.get(gesture_id, "❓")
+        
+        # Create a pixmap with the emoji
+        pixmap = QPixmap(24, 24)
+        pixmap.fill(Qt.transparent)
+        
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.Antialiasing)
+        
+        # Set font for emoji (force color emoji font per OS)
+        import platform as _plt
+        font = QFont()
+        os_name = _plt.system()
+        if os_name == "Darwin":
+            font.setFamily("Apple Color Emoji")
+        elif os_name == "Windows":
+            font.setFamily("Segoe UI Emoji")
+        else:
+            # Most Linux distros
+            font.setFamily("Noto Color Emoji")
+        font.setPointSize(16)
+        painter.setFont(font)
+        
+        # Draw emoji centered
+        painter.drawText(pixmap.rect(), Qt.AlignCenter, emoji)
+        painter.end()
+        
+        return QIcon(pixmap)
     
     def _get_app_name_from_path(self, app_path: str) -> str:
         """Extract application name from path."""
