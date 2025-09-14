@@ -2,7 +2,7 @@
 Gesture trainer dialog for training custom gestures.
 """
 
-from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton, QDialogButtonBox
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton, QDialogButtonBox
 from loguru import logger
 
 

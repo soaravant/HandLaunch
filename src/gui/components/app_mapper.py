@@ -2,13 +2,13 @@
 App mapper widget for managing gesture to application mappings.
 """
 
-from PyQt6.QtWidgets import (
+from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, 
     QTableWidgetItem, QPushButton, QLabel, QComboBox,
     QFileDialog, QMessageBox, QHeaderView
 )
-from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QIcon
+from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QIcon
 from loguru import logger
 
 
@@ -45,12 +45,12 @@ class AppMapperWidget(QWidget):
         
         # Set table properties
         header = self.mappings_table.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.Stretch)
         
         self.mappings_table.setAlternatingRowColors(True)
-        self.mappings_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.mappings_table.setSelectionBehavior(QTableWidget.SelectRows)
         
         layout.addWidget(self.mappings_table)
         
@@ -118,18 +118,18 @@ class AppMapperWidget(QWidget):
         for row, (gesture, app_path) in enumerate(self.mappings.items()):
             # Gesture name
             gesture_item = QTableWidgetItem(self._get_gesture_display_name(gesture))
-            gesture_item.setFlags(gesture_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+            gesture_item.setFlags(gesture_item.flags() & ~Qt.ItemIsEditable)
             self.mappings_table.setItem(row, 0, gesture_item)
             
             # Application name
             app_name = self._get_app_name_from_path(app_path)
             app_item = QTableWidgetItem(app_name)
-            app_item.setFlags(app_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+            app_item.setFlags(app_item.flags() & ~Qt.ItemIsEditable)
             self.mappings_table.setItem(row, 1, app_item)
             
             # Application path
             path_item = QTableWidgetItem(app_path)
-            path_item.setFlags(path_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+            path_item.setFlags(path_item.flags() & ~Qt.ItemIsEditable)
             self.mappings_table.setItem(row, 2, path_item)
         
         logger.info("Refreshed mappings table")
@@ -167,7 +167,7 @@ class AppMapperWidget(QWidget):
     
     def add_mapping(self):
         """Add a new gesture mapping."""
-        from .app_mapping_dialog import AppMappingDialog
+        from gui.components.app_mapping_dialog import AppMappingDialog
         
         dialog = AppMappingDialog(self, self.available_apps, list(self.mappings.keys()))
         if dialog.exec():
@@ -189,7 +189,7 @@ class AppMapperWidget(QWidget):
         gesture_id = self._get_gesture_id_from_display_name(gesture_item.text())
         
         if gesture_id:
-            from .app_mapping_dialog import AppMappingDialog
+            from gui.components.app_mapping_dialog import AppMappingDialog
             
             dialog = AppMappingDialog(
                 self, 

@@ -1,5 +1,5 @@
 """
-Configuration management module for GestureLauncher.
+Configuration management module for HandLaunch.
 
 This module handles loading, saving, and managing application configuration.
 """
@@ -230,3 +230,4 @@ class ConfigManager:
         deep_update(self.user_config, updates)
         self._save_user_config(self.user_config)
         logger.info("Configuration updated")
+

@@ -1,5 +1,5 @@
 """
-Camera management module for GestureLauncher.
+Camera management module for HandLaunch.
 
 This module handles camera access, video capture, and frame processing.
 """
@@ -157,3 +157,4 @@ class CameraManager:
         """Cleanup camera resources."""
         self.stop_camera()
         logger.info("Camera manager cleaned up")
+

@@ -1,27 +1,27 @@
 """
-Main window for the GestureLauncher application.
+Main window for the HandLaunch application.
 
 This module contains the main application window with camera preview,
 gesture controls, and application management.
 """
 
-from PyQt6.QtWidgets import (
+from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
     QLabel, QPushButton, QTabWidget, QStatusBar,
-    QMenuBar, QMenu, QMessageBox, QSystemTrayIcon
+    QMenuBar, QMenu, QMessageBox, QSystemTrayIcon, QAction
 )
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal
-from PyQt6.QtGui import QAction, QIcon
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal
+from PyQt5.QtGui import QIcon
 from loguru import logger
 
-from .components.camera_widget import CameraWidget
-from .components.gesture_list import GestureListWidget
-from .components.app_mapper import AppMapperWidget
-from .settings_dialog import SettingsDialog
-from ..core.camera_manager import CameraManager
-from ..core.gesture_detector import GestureDetector
-from ..core.app_launcher import AppLauncher
-from ..core.config_manager import ConfigManager
+from gui.components.camera_widget import CameraWidget
+from gui.components.gesture_list import GestureListWidget
+from gui.components.app_mapper import AppMapperWidget
+from gui.settings_dialog import SettingsDialog
+from core.camera_manager import CameraManager
+from core.gesture_detector import GestureDetector
+from core.app_launcher import AppLauncher
+from core.config_manager import ConfigManager
 
 
 class MainWindow(QMainWindow):
@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
     
     def setup_ui(self):
         """Setup the user interface."""
-        self.setWindowTitle("GestureLauncher v0.1.0")
+        self.setWindowTitle("HandLaunch v0.1.0")
         self.setMinimumSize(800, 600)
         self.resize(1000, 700)
         
@@ -224,7 +224,7 @@ class MainWindow(QMainWindow):
     
     def open_gesture_trainer(self):
         """Open the gesture training dialog."""
-        from .gesture_trainer import GestureTrainerDialog
+        from gui.gesture_trainer import GestureTrainerDialog
         
         dialog = GestureTrainerDialog(self)
         if dialog.exec():
@@ -243,11 +243,11 @@ class MainWindow(QMainWindow):
         """Show about dialog."""
         QMessageBox.about(
             self,
-            "About GestureLauncher",
-            "GestureLauncher v0.1.0\n\n"
+            "About HandLaunch",
+            "HandLaunch v0.1.0\n\n"
             "A desktop application that uses hand gesture recognition\n"
             "to launch applications via camera input.\n\n"
-            "Built with Python, OpenCV, MediaPipe, and PyQt6."
+            "Built with Python, OpenCV, MediaPipe, and PyQt5."
         )
     
     def update_status(self):

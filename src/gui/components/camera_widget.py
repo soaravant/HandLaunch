@@ -4,9 +4,9 @@ Camera widget for displaying video feed and gesture detection overlay.
 
 import cv2
 import numpy as np
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QThread
-from PyQt6.QtGui import QImage, QPixmap
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QThread
+from PyQt5.QtGui import QImage, QPixmap
 from loguru import logger
 
 
@@ -32,7 +32,7 @@ class CameraWidget(QWidget):
         
         # Camera display label
         self.camera_label = QLabel()
-        self.camera_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.camera_label.setAlignment(Qt.AlignCenter)
         self.camera_label.setMinimumSize(640, 480)
         self.camera_label.setStyleSheet("""
             QLabel {
@@ -79,14 +79,14 @@ class CameraWidget(QWidget):
             h, w, ch = rgb_image.shape
             bytes_per_line = ch * w
             
-            qt_image = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
+            qt_image = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
             
             # Scale image to fit label while maintaining aspect ratio
             pixmap = QPixmap.fromImage(qt_image)
             scaled_pixmap = pixmap.scaled(
                 self.camera_label.size(),
-                Qt.AspectRatioMode.KeepAspectRatio,
-                Qt.TransformationMode.SmoothTransformation
+                Qt.KeepAspectRatio,
+                Qt.SmoothTransformation
             )
             
             self.camera_label.setPixmap(scaled_pixmap)

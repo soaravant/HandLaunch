@@ -1,4 +1,4 @@
-# GestureLauncher
+# HandLaunch
 
 A desktop application that uses hand gesture recognition to launch applications via camera input.
 
@@ -22,8 +22,8 @@ A desktop application that uses hand gesture recognition to launch applications 
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/GestureLauncher.git
-cd GestureLauncher
+git clone https://github.com/yourusername/HandLaunch.git
+cd HandLaunch
 ```
 
 2. Create a virtual environment:
@@ -86,4 +86,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - MediaPipe for hand detection capabilities
 - OpenCV for computer vision processing
-- PyQt6 for the desktop interface
+- PyQt5 for the desktop interface
+

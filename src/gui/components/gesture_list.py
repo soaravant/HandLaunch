@@ -2,12 +2,12 @@
 Gesture list widget for managing available gestures.
 """
 
-from PyQt6.QtWidgets import (
+from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QListWidget, 
     QListWidgetItem, QPushButton, QLabel, QMessageBox
 )
-from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QIcon
+from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QIcon
 from loguru import logger
 
 
@@ -105,13 +105,13 @@ class GestureListWidget(QWidget):
         for gesture_id, gesture_data in self.gestures.items():
             item = QListWidgetItem()
             item.setText(f"{gesture_data['name']} ({gesture_data['confidence']:.1f})")
-            item.setData(Qt.ItemDataRole.UserRole, gesture_id)
+            item.setData(Qt.UserRole, gesture_id)
             
             # Set item properties based on enabled state
             if gesture_data['enabled']:
-                item.setForeground(Qt.GlobalColor.black)
+                item.setForeground(Qt.black)
             else:
-                item.setForeground(Qt.GlobalColor.gray)
+                item.setForeground(Qt.gray)
             
             self.gesture_list.addItem(item)
         
@@ -119,7 +119,7 @@ class GestureListWidget(QWidget):
     
     def on_gesture_selected(self, item: QListWidgetItem):
         """Handle gesture selection."""
-        gesture_id = item.data(Qt.ItemDataRole.UserRole)
+        gesture_id = item.data(Qt.UserRole)
         if gesture_id:
             self.gesture_selected.emit(gesture_id)
             logger.info(f"Selected gesture: {gesture_id}")
@@ -136,7 +136,7 @@ class GestureListWidget(QWidget):
             return
         
         item = selected_items[0]
-        gesture_id = item.data(Qt.ItemDataRole.UserRole)
+        gesture_id = item.data(Qt.UserRole)
         
         if gesture_id in self.gestures:
             # Confirm deletion

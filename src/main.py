@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-GestureLauncher - Main application entry point.
+HandLaunch - Main application entry point.
 
-This module initializes and runs the GestureLauncher desktop application.
+This module initializes and runs the HandLaunch desktop application.
 """
 
 import sys
@@ -14,8 +14,8 @@ from loguru import logger
 src_dir = Path(__file__).parent
 sys.path.insert(0, str(src_dir))
 
-from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import Qt
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore import Qt
 from gui.main_window import MainWindow
 
 
@@ -35,7 +35,7 @@ def setup_logging():
     log_dir = Path("data/logs")
     log_dir.mkdir(parents=True, exist_ok=True)
     logger.add(
-        log_dir / "gesture_launcher.log",
+        log_dir / "hand_launch.log",
         rotation="1 day",
         retention="7 days",
         format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}",
@@ -47,13 +47,13 @@ def main():
     """Main application entry point."""
     # Setup logging
     setup_logging()
-    logger.info("Starting GestureLauncher application")
+    logger.info("Starting HandLaunch application")
     
     # Create QApplication
     app = QApplication(sys.argv)
-    app.setApplicationName("GestureLauncher")
+    app.setApplicationName("HandLaunch")
     app.setApplicationVersion("0.1.0")
-    app.setOrganizationName("GestureLauncher")
+    app.setOrganizationName("HandLaunch")
     
     # Set application style
     app.setStyle('Fusion')

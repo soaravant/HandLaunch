@@ -1,5 +1,5 @@
 """
-Application launcher module for GestureLauncher.
+Application launcher module for HandLaunch.
 
 This module handles launching external applications based on detected gestures.
 """
@@ -271,3 +271,4 @@ class AppLauncher:
         except Exception as e:
             logger.error(f"Error closing app: {e}")
             return False
+

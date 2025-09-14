@@ -2,7 +2,7 @@
 Settings dialog for GestureLauncher configuration.
 """
 
-from PyQt6.QtWidgets import QDialog, QVBoxLayout, QTabWidget, QDialogButtonBox
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QTabWidget, QDialogButtonBox
 from loguru import logger
 
 

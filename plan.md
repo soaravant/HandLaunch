@@ -1,7 +1,7 @@
-# GestureLauncher - Desktop App Development Plan
+# HandLaunch - Desktop App Development Plan
 
 ## Project Overview
-**Project Title:** Desktop App | GestureLauncher  
+**Project Title:** Desktop App | HandLaunch  
 **Project Description:** Hand gesture recognition system for launching applications via camera  
 **Target Platform:** Desktop (Windows, macOS, Linux)  
 **Primary Language:** Python  
@@ -20,7 +20,7 @@ A desktop application that uses computer vision and machine learning to:
 - **Python 3.8+**: Main application logic
 - **OpenCV**: Computer vision, camera access, and image processing
 - **MediaPipe**: Hand landmark detection and gesture recognition
-- **PyQt6**: Desktop GUI framework for modern interface
+- **PyQt5**: Desktop GUI framework for modern interface
 - **NumPy**: Numerical computations for gesture processing
 - **Pillow**: Image processing and manipulation
 
@@ -32,7 +32,7 @@ A desktop application that uses computer vision and machine learning to:
 
 ## Project Structure
 ```
-GestureLauncher/
+HandLaunch/
 ├── src/
 │   ├── __init__.py
 │   ├── main.py                 # Application entry point
@@ -105,7 +105,7 @@ GestureLauncher/
 
 2. **Basic Application Framework**
    - Create main.py entry point
-   - Set up basic PyQt6 application window
+   - Set up basic PyQt5 application window
    - Implement basic logging system
    - Create configuration management system
 
@@ -116,7 +116,7 @@ GestureLauncher/
    - Implement camera settings (resolution, FPS)
 
 **Deliverables:**
-- Working PyQt6 application window
+- Working PyQt5 application window
 - Camera preview functionality
 - Basic configuration system
 
@@ -352,4 +352,5 @@ GestureLauncher/
 - **Software**: Python development environment
 - **External**: MediaPipe, OpenCV documentation and community
 
-This plan provides a comprehensive roadmap for developing the GestureLauncher desktop application, with clear phases, deliverables, and success criteria.
+This plan provides a comprehensive roadmap for developing the HandLaunch desktop application, with clear phases, deliverables, and success criteria.
+

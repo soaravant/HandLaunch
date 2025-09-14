@@ -1,5 +1,5 @@
 """
-Gesture detection module for GestureLauncher.
+Gesture detection module for HandLaunch.
 
 This module handles hand gesture detection using MediaPipe and OpenCV.
 """
@@ -181,3 +181,4 @@ class GestureDetector:
         if hasattr(self, 'hands'):
             self.hands.close()
         logger.info("Gesture detector cleaned up")
+
