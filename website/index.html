@@ -5,20 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HandLaunch — Gesture-based App Launcher</title>
     <meta name="description" content="Download HandLaunch for macOS, Windows, or Linux. Instantly launch apps with hand gestures using your webcam." />
-    <link rel="preload" href="/assets/icons/open_palm.svg" as="image" type="image/svg+xml" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <header class="site-header">
       <div class="container header-inner">
         <div class="brand">
-          <img src="/assets/icons/open_palm.svg" alt="HandLaunch logo" class="brand-logo" />
+          <span class="brand-emoji" aria-label="HandLaunch logo" role="img">✋</span>
           <span class="brand-name">HandLaunch</span>
         </div>
         <nav class="nav">
           <a href="#download">Download</a>
           <a href="#how-it-works">How it works</a>
-          <a href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
+          <a href="#built-with">Built With</a>
+          <a href="https://github.com/soaravant/HandLaunch" target="_blank" rel="noopener">GitHub</a>
         </nav>
       </div>
     </header>
@@ -37,10 +37,42 @@
           </div>
           <div class="hero-visual">
             <div class="preview-card">
-              <img src="/assets/preview-camera.png" alt="Camera preview UI mock" onerror="this.style.display='none'" />
-              <div class="preview-fallback">
-                <img src="/assets/icons/pointing.svg" alt="Gesture icon" />
-                <span>Point & Launch</span>
+              <div class="gesture-animation">
+                <div class="gesture-card active" data-gesture="open_palm">
+                  <div class="gesture-icon">✋</div>
+                  <div class="app-preview">
+                    <div class="app-icon" id="open-palm-app"></div>
+                    <span class="app-name" id="open-palm-name">Safari</span>
+                  </div>
+                </div>
+                <div class="gesture-card" data-gesture="fist">
+                  <div class="gesture-icon">✊</div>
+                  <div class="app-preview">
+                    <div class="app-icon" id="fist-app"></div>
+                    <span class="app-name" id="fist-name">Finder</span>
+                  </div>
+                </div>
+                <div class="gesture-card" data-gesture="peace_sign">
+                  <div class="gesture-icon">✌️</div>
+                  <div class="app-preview">
+                    <div class="app-icon" id="peace-app"></div>
+                    <span class="app-name" id="peace-name">TextEdit</span>
+                  </div>
+                </div>
+                <div class="gesture-card" data-gesture="thumbs_up">
+                  <div class="gesture-icon">👍</div>
+                  <div class="app-preview">
+                    <div class="app-icon" id="thumbs-app"></div>
+                    <span class="app-name" id="thumbs-name">Mail</span>
+                  </div>
+                </div>
+                <div class="gesture-card" data-gesture="pointing">
+                  <div class="gesture-icon">👆</div>
+                  <div class="app-preview">
+                    <div class="app-icon" id="pointing-app"></div>
+                    <span class="app-name" id="pointing-name">Terminal</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -53,7 +85,7 @@
           <p class="muted">Your OS is detected automatically. You can also choose manually.</p>
           <div class="download-grid">
             <a id="btn-macos" class="download-card" href="https://github.com/soaravant/HandLaunch/releases/latest/download/HandLaunch-mac.zip" data-os="macos">
-              <div class="card-icon"><img src="/assets/icons/open_palm.svg" alt="macOS" /></div>
+              <div class="card-icon"><img src="/assets/icons/apple.svg" alt="macOS" /></div>
               <div class="card-body">
                 <div class="card-title">macOS</div>
                 <div class="card-sub">Apple Silicon & Intel</div>
@@ -61,7 +93,7 @@
               <div class="card-cta">.zip</div>
             </a>
             <a id="btn-windows" class="download-card" href="https://github.com/soaravant/HandLaunch/releases/latest/download/HandLaunch-win.exe" data-os="windows">
-              <div class="card-icon"><img src="/assets/icons/fist.svg" alt="Windows" /></div>
+              <div class="card-icon"><img src="/assets/icons/windows.svg" alt="Windows" /></div>
               <div class="card-body">
                 <div class="card-title">Windows</div>
                 <div class="card-sub">Windows 10/11</div>
@@ -69,7 +101,7 @@
               <div class="card-cta">.exe</div>
             </a>
             <a id="btn-linux" class="download-card" href="https://github.com/soaravant/HandLaunch/releases/latest/download/HandLaunch-linux.tar.gz" data-os="linux">
-              <div class="card-icon"><img src="/assets/icons/thumbs_up.svg" alt="Linux" /></div>
+              <div class="card-icon"><img src="/assets/icons/linux.svg" alt="Linux" /></div>
               <div class="card-body">
                 <div class="card-title">Linux</div>
                 <div class="card-sub">AppImage or tar.gz</div>
@@ -88,20 +120,78 @@
           <h2>How it works</h2>
           <div class="cards">
             <article class="card">
-              <div class="card-media"><img src="/assets/icons/open_palm.svg" alt="Camera" /></div>
+              <div class="card-media"><span class="emoji-icon" role="img" aria-label="Open Palm">✋</span></div>
               <h3>See</h3>
               <p>Uses your webcam with on-device processing for privacy.</p>
             </article>
             <article class="card">
-              <div class="card-media"><img src="/assets/icons/peace_sign.svg" alt="Gestures" /></div>
+              <div class="card-media"><span class="emoji-icon" role="img" aria-label="Peace Sign">✌️</span></div>
               <h3>Understand</h3>
               <p>Recognizes common gestures like open palm, fist, peace sign, and more.</p>
             </article>
             <article class="card">
-              <div class="card-media"><img src="/assets/icons/pointing.svg" alt="Launch" /></div>
+              <div class="card-media"><span class="emoji-icon" role="img" aria-label="Pointing">👆</span></div>
               <h3>Launch</h3>
               <p>Map gestures to apps. One gesture, instant action.</p>
             </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="built-with" class="built-with">
+        <div class="container">
+          <h2>Built With</h2>
+          <p class="muted">Interactive technology stack powering HandLaunch</p>
+          <div class="architecture-intro">
+            <p>HandLaunch's architecture follows a modular design where each component has a specific role in the gesture recognition pipeline. The system processes camera input through computer vision layers, applies machine learning for gesture classification, and integrates with the operating system for app launching. Click on any node to explore how it contributes to the overall system.</p>
+          </div>
+          <div class="tech-canvas-container">
+            <div class="canvas-controls">
+              <button id="zoom-in" class="canvas-btn" title="Zoom In">+</button>
+              <button id="zoom-out" class="canvas-btn" title="Zoom Out">−</button>
+              <button id="reset-view" class="canvas-btn" title="Reset View">⌂</button>
+            </div>
+            <canvas id="tech-canvas" width="900" height="700"></canvas>
+            <div id="node-details" class="node-details hidden" aria-live="polite">
+              <div class="node-title"></div>
+              <div class="node-desc muted small"></div>
+            </div>
+            <div class="canvas-instructions">
+              <p class="small muted">Use mouse wheel or buttons to zoom • Drag to pan • Click nodes for details</p>
+            </div>
+            <div class="tech-legend">
+              <h4>Technology Categories</h4>
+              <div class="legend-items">
+                <div class="legend-item">
+                  <span class="legend-emoji">🐍</span>
+                  <span class="legend-label">Core Language</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-emoji">📷</span>
+                  <span class="legend-label">Computer Vision</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-emoji">🤖</span>
+                  <span class="legend-label">Machine Learning</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-emoji">🖼️</span>
+                  <span class="legend-label">User Interface</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-emoji">🧮</span>
+                  <span class="legend-label">Data Processing</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-emoji">📦</span>
+                  <span class="legend-label">Build & Deploy</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-emoji">⚙️</span>
+                  <span class="legend-label">System Integration</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -116,7 +206,8 @@
         <div class="foot-right">
           <a href="#download">Download</a>
           <a href="#how-it-works">How it works</a>
-          <a href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
+          <a href="#built-with">Built With</a>
+          <a href="https://github.com/soaravant/HandLaunch" target="_blank" rel="noopener">GitHub</a>
         </div>
       </div>
     </footer>
