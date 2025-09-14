@@ -6,9 +6,11 @@ from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QListWidget, 
     QListWidgetItem, QPushButton, QLabel, QMessageBox
 )
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import Qt, pyqtSignal, QSize
+from PyQt5.QtGui import QIcon, QPixmap
 from loguru import logger
+import os
+from pathlib import Path
 
 
 class GestureListWidget(QWidget):
@@ -21,10 +23,12 @@ class GestureListWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.gestures = {}
+        # Fix path resolution - go up from src/gui/components to project root
+        self.icon_path = Path(__file__).parent.parent.parent.parent / "resources" / "icons"
         self.setup_ui()
         self.load_gestures()
         
-        logger.info("Gesture list widget initialized")
+        logger.info(f"Gesture list widget initialized, icon path: {self.icon_path}")
     
     def setup_ui(self):
         """Setup the user interface."""
@@ -32,11 +36,12 @@ class GestureListWidget(QWidget):
         
         # Title
         title_label = QLabel("Available Gestures")
-        title_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+        title_label.setStyleSheet("font-weight: bold; font-size: 14px; color: white;")
         layout.addWidget(title_label)
         
         # Gesture list
         self.gesture_list = QListWidget()
+        self.gesture_list.setIconSize(QSize(24, 24))
         self.gesture_list.itemClicked.connect(self.on_gesture_selected)
         layout.addWidget(self.gesture_list)
         
@@ -107,9 +112,21 @@ class GestureListWidget(QWidget):
             item.setText(f"{gesture_data['name']} ({gesture_data['confidence']:.1f})")
             item.setData(Qt.UserRole, gesture_id)
             
+            # Set gesture icon (prefer PNG, fallback to SVG)
+            png_path = self.icon_path / f"{gesture_id}.png"
+            svg_path = self.icon_path / f"{gesture_id}.svg"
+            if png_path.exists():
+                item.setIcon(QIcon(str(png_path)))
+                logger.debug(f"Set icon for {gesture_id}: {png_path}")
+            elif svg_path.exists():
+                item.setIcon(QIcon(str(svg_path)))
+                logger.debug(f"Set icon for {gesture_id}: {svg_path}")
+            else:
+                logger.warning(f"Gesture icon not found: {png_path} or {svg_path}")
+            
             # Set item properties based on enabled state
             if gesture_data['enabled']:
-                item.setForeground(Qt.black)
+                item.setForeground(Qt.white)
             else:
                 item.setForeground(Qt.gray)
             

@@ -7,9 +7,14 @@ from PyQt5.QtWidgets import (
     QTableWidgetItem, QPushButton, QLabel, QComboBox,
     QFileDialog, QMessageBox, QHeaderView
 )
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import Qt, pyqtSignal, QSize, QFileInfo
+from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtWidgets import QFileIconProvider
 from loguru import logger
+import os
+import platform
+from pathlib import Path
+from core.config_manager import ConfigManager
 
 
 class AppMapperWidget(QWidget):
@@ -22,12 +27,15 @@ class AppMapperWidget(QWidget):
         super().__init__(parent)
         self.mappings = {}
         self.available_apps = []
+        # Fix path resolution - go up from src/gui/components to project root
+        self.icon_path = Path(__file__).parent.parent.parent.parent / "resources" / "icons"
+        self.config_manager = ConfigManager()
         
         self.setup_ui()
         self.load_mappings()
         self.discover_apps()
         
-        logger.info("App mapper widget initialized")
+        logger.info(f"App mapper widget initialized, icon path: {self.icon_path}")
     
     def setup_ui(self):
         """Setup the user interface."""
@@ -50,6 +58,7 @@ class AppMapperWidget(QWidget):
         header.setSectionResizeMode(2, QHeaderView.Stretch)
         
         self.mappings_table.setAlternatingRowColors(True)
+        self.mappings_table.setIconSize(QSize(20, 20))
         self.mappings_table.setSelectionBehavior(QTableWidget.SelectRows)
         
         layout.addWidget(self.mappings_table)
@@ -83,31 +92,135 @@ class AppMapperWidget(QWidget):
         self.mappings_table.itemSelectionChanged.connect(self.on_selection_changed)
     
     def load_mappings(self):
-        """Load gesture mappings."""
-        # Default mappings (empty for now)
-        default_mappings = {
-            "open_palm": "",
-            "fist": "",
-            "peace_sign": "",
-            "thumbs_up": "",
-            "pointing": ""
-        }
-        
-        self.mappings = default_mappings
+        """Load gesture mappings from config; seed sensible OS defaults if empty."""
+        cfg = self.config_manager.get_gesture_mappings() or {}
+        # Consider empty if all values are empty strings
+        is_empty = True
+        if cfg:
+            for v in cfg.values():
+                if v:
+                    is_empty = False
+                    break
+        if not cfg or is_empty:
+            defaults = self._get_os_default_mappings()
+            self.mappings = defaults
+            try:
+                self.config_manager.set_gesture_mappings(defaults)
+            except Exception as e:
+                logger.warning(f"Failed to persist default mappings: {e}")
+        else:
+            self.mappings = cfg
         self.refresh_table()
+
+    def _get_os_default_mappings(self) -> dict:
+        """Return default mappings per OS with commonly available apps."""
+        sysname = platform.system()
+        if sysname == "Darwin":
+            return {
+                "open_palm": "/Applications/Safari.app",
+                "fist": "/System/Library/CoreServices/Finder.app",
+                "peace_sign": "/System/Applications/TextEdit.app",
+                "thumbs_up": "/Applications/VLC.app",
+                "pointing": "/Applications/Utilities/Terminal.app"
+            }
+        if sysname == "Windows":
+            # Prefer Chrome/Firefox/Edge if present; otherwise Notepad
+            candidates = [
+                "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+                "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+                "C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe",
+                "msedge.exe",
+            ]
+            def first_existing(paths):
+                for p in paths:
+                    if p.endswith('.exe') and (os.path.exists(p) or p in ("notepad.exe","explorer.exe","calc.exe","msedge.exe")):
+                        return p
+                return "notepad.exe"
+            browser = first_existing(candidates)
+            return {
+                "open_palm": browser,
+                "fist": "explorer.exe",
+                "peace_sign": browser,
+                "thumbs_up": "C:\\Program Files\\VideoLAN\\VLC\\vlc.exe",
+                "pointing": "notepad.exe"
+            }
+        # Linux (GNOME-friendly). Commands expected on PATH.
+        return {
+            "open_palm": "firefox",
+            "fist": "nautilus",
+            "peace_sign": "firefox",
+            "thumbs_up": "vlc",
+            "pointing": "gedit"
+        }
     
     def discover_apps(self):
         """Discover available applications."""
-        # This would integrate with the AppLauncher class
-        # For now, use some common applications
-        self.available_apps = [
-            {"name": "Chrome", "path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"},
-            {"name": "Firefox", "path": "C:\\Program Files\\Mozilla Firefox\\firefox.exe"},
-            {"name": "Notepad", "path": "notepad.exe"},
-            {"name": "Calculator", "path": "calc.exe"},
-            {"name": "File Explorer", "path": "explorer.exe"},
-            {"name": "VLC Media Player", "path": "C:\\Program Files\\VideoLAN\\VLC\\vlc.exe"},
-        ]
+        import platform
+        import os
+        
+        self.available_apps = []
+        
+        if platform.system() == "Darwin":  # macOS
+            # Helper to pick first existing path from candidates
+            def first_existing_path(paths: list) -> str:
+                for p in paths:
+                    if os.path.exists(p):
+                        return p
+                return ""
+
+            # Common macOS applications with multiple candidate locations
+            common_apps = [
+                ("Safari", ["/Applications/Safari.app"]),
+                ("Chrome", ["/Applications/Google Chrome.app"]),
+                ("Firefox", ["/Applications/Firefox.app"]),
+                ("Calculator", ["/System/Applications/Calculator.app", "/Applications/Calculator.app"]),
+                ("TextEdit", ["/System/Applications/TextEdit.app", "/Applications/TextEdit.app"]),
+                ("Mail", ["/System/Applications/Mail.app", "/Applications/Mail.app"]),
+                ("Finder", ["/System/Library/CoreServices/Finder.app"]),
+                ("Terminal", ["/Applications/Utilities/Terminal.app", "/System/Applications/Utilities/Terminal.app"]),
+                ("Activity Monitor", ["/Applications/Utilities/Activity Monitor.app"]),
+                ("VLC", ["/Applications/VLC.app"]),
+                ("Spotify", ["/Applications/Spotify.app"]),
+                ("Messages", ["/System/Applications/Messages.app", "/Applications/Messages.app"]),
+                ("FaceTime", ["/System/Applications/FaceTime.app", "/Applications/FaceTime.app"]),
+                ("Photos", ["/System/Applications/Photos.app", "/Applications/Photos.app"]),
+            ]
+
+            for name, candidates in common_apps:
+                chosen = first_existing_path(candidates)
+                if chosen:
+                    self.available_apps.append({"name": name, "path": chosen})
+        
+        elif platform.system() == "Windows":
+            # Windows applications
+            common_apps = [
+                ("Chrome", "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"),
+                ("Firefox", "C:\\Program Files\\Mozilla Firefox\\firefox.exe"),
+                ("Notepad", "notepad.exe"),
+                ("Calculator", "calc.exe"),
+                ("File Explorer", "explorer.exe"),
+                ("VLC Media Player", "C:\\Program Files\\VideoLAN\\VLC\\vlc.exe"),
+            ]
+            
+            for name, path in common_apps:
+                if os.path.exists(path) or path.endswith('.exe'):
+                    self.available_apps.append({"name": name, "path": path})
+        
+        else:  # Linux
+            # Linux applications
+            common_apps = [
+                ("Firefox", "firefox"),
+                ("Chrome", "google-chrome"),
+                ("Gedit", "gedit"),
+                ("Calculator", "gnome-calculator"),
+                ("File Manager", "nautilus"),
+                ("VLC", "vlc"),
+                ("Terminal", "gnome-terminal"),
+            ]
+            
+            for name, command in common_apps:
+                self.available_apps.append({"name": name, "path": command})
         
         logger.info(f"Discovered {len(self.available_apps)} applications")
     
@@ -116,15 +229,34 @@ class AppMapperWidget(QWidget):
         self.mappings_table.setRowCount(len(self.mappings))
         
         for row, (gesture, app_path) in enumerate(self.mappings.items()):
-            # Gesture name
+            # Gesture name with icon
             gesture_item = QTableWidgetItem(self._get_gesture_display_name(gesture))
             gesture_item.setFlags(gesture_item.flags() & ~Qt.ItemIsEditable)
+            
+            # Set gesture icon (prefer PNG, fallback to SVG)
+            png_path = self.icon_path / f"{gesture}.png"
+            svg_path = self.icon_path / f"{gesture}.svg"
+            if png_path.exists():
+                gesture_item.setIcon(QIcon(str(png_path)))
+                logger.debug(f"Set gesture icon for {gesture}: {png_path}")
+            elif svg_path.exists():
+                gesture_item.setIcon(QIcon(str(svg_path)))
+                logger.debug(f"Set gesture icon for {gesture}: {svg_path}")
+            else:
+                logger.warning(f"Gesture icon not found: {png_path} or {svg_path}")
+            
             self.mappings_table.setItem(row, 0, gesture_item)
             
-            # Application name
+            # Application name with icon
             app_name = self._get_app_name_from_path(app_path)
             app_item = QTableWidgetItem(app_name)
             app_item.setFlags(app_item.flags() & ~Qt.ItemIsEditable)
+            
+            # Set app icon
+            app_icon = self._get_app_icon(app_path)
+            if not app_icon.isNull():
+                app_item.setIcon(app_icon)
+            
             self.mappings_table.setItem(row, 1, app_item)
             
             # Application path
@@ -157,7 +289,81 @@ class AppMapperWidget(QWidget):
         
         # Extract from path
         import os
-        return os.path.basename(app_path)
+        base = os.path.basename(app_path)
+        # Strip .app suffix for nicer display
+        name, ext = os.path.splitext(base)
+        return name if ext.lower() == ".app" else base
+    
+    def _get_app_icon(self, app_path: str) -> QIcon:
+        """Get application icon."""
+        if not app_path:
+            return QIcon()
+        
+        try:
+            if platform.system() == "Darwin" and app_path.endswith('.app'):
+                # First, try via NSWorkspace for guaranteed correct app icon
+                ns_icon = self._get_macos_icon_via_nsworkspace(app_path)
+                if ns_icon is not None and not ns_icon.isNull():
+                    return ns_icon
+                # For macOS .app bundles, try to get the icon from the bundle
+                resources_path = os.path.join(app_path, "Contents", "Resources")
+                
+                if os.path.exists(resources_path):
+                    # Try common icon names
+                    icon_names = [
+                        "AppIcon.icns", "icon.icns", "App.icns", "application.icns",
+                        "AppIcon.png", "icon.png", "App.png", "application.png"
+                    ]
+                    
+                    for icon_name in icon_names:
+                        icon_path = os.path.join(resources_path, icon_name)
+                        if os.path.exists(icon_path):
+                            return QIcon(icon_path)
+                    
+                    # Try to find any .icns or .png file in Resources
+                    for file in os.listdir(resources_path):
+                        if file.endswith(('.icns', '.png')):
+                            icon_path = os.path.join(resources_path, file)
+                            return QIcon(icon_path)
+
+                # Try using QFileIconProvider on the bundle path
+                try:
+                    provider = QFileIconProvider()
+                    return provider.icon(QFileInfo(app_path))
+                except Exception:
+                    logger.debug("QFileIconProvider fallback failed")
+            
+            # Fallback to default app icon
+            return QIcon()
+        except Exception as e:
+            logger.warning(f"Could not load icon for {app_path}: {e}")
+            return QIcon()
+
+    def _get_macos_icon_via_nsworkspace(self, app_path: str) -> QIcon:
+        """Fetch macOS app icon using NSWorkspace and convert to QIcon.
+        Returns QIcon() if unavailable.
+        """
+        try:
+            from AppKit import NSWorkspace, NSBitmapImageRep, NSPNGFileType
+            icon = NSWorkspace.sharedWorkspace().iconForFile_(app_path)
+            if icon is None:
+                return QIcon()
+            icon.setSize_((64, 64))
+            tiff_data = icon.TIFFRepresentation()
+            if tiff_data is None:
+                return QIcon()
+            bitmap = NSBitmapImageRep.imageRepWithData_(tiff_data)
+            png_data = bitmap.representationUsingType_properties_(NSPNGFileType, None)
+            if png_data is None:
+                return QIcon()
+            data_bytes = bytes(png_data)
+            pixmap = QPixmap()
+            if not pixmap.loadFromData(data_bytes, "PNG"):
+                return QIcon()
+            return QIcon(pixmap)
+        except Exception as e:
+            logger.debug(f"NSWorkspace icon fetch failed for {app_path}: {e}")
+            return QIcon()
     
     def on_selection_changed(self):
         """Handle table selection change."""
@@ -176,6 +382,11 @@ class AppMapperWidget(QWidget):
                 self.mappings[gesture] = app_path
                 self.refresh_table()
                 self.mapping_changed.emit(gesture, app_path)
+                # Persist change
+                try:
+                    self.config_manager.set_gesture_mapping(gesture, app_path)
+                except Exception as e:
+                    logger.warning(f"Failed to persist mapping: {e}")
                 logger.info(f"Added mapping: {gesture} -> {app_path}")
     
     def edit_mapping(self):
@@ -204,6 +415,10 @@ class AppMapperWidget(QWidget):
                     self.mappings[gesture] = app_path
                     self.refresh_table()
                     self.mapping_changed.emit(gesture, app_path)
+                    try:
+                        self.config_manager.set_gesture_mapping(gesture, app_path)
+                    except Exception as e:
+                        logger.warning(f"Failed to persist mapping: {e}")
                     logger.info(f"Updated mapping: {gesture} -> {app_path}")
     
     def remove_mapping(self):
@@ -228,6 +443,10 @@ class AppMapperWidget(QWidget):
                 self.mappings[gesture_id] = ""
                 self.refresh_table()
                 self.mapping_changed.emit(gesture_id, "")
+                try:
+                    self.config_manager.set_gesture_mapping(gesture_id, "")
+                except Exception as e:
+                    logger.warning(f"Failed to persist mapping removal: {e}")
                 logger.info(f"Removed mapping for: {gesture_id}")
     
     def _get_gesture_id_from_display_name(self, display_name: str) -> str:
@@ -250,6 +469,10 @@ class AppMapperWidget(QWidget):
         self.mappings[gesture] = app_path
         self.refresh_table()
         self.mapping_changed.emit(gesture, app_path)
+        try:
+            self.config_manager.set_gesture_mapping(gesture, app_path)
+        except Exception as e:
+            logger.warning(f"Failed to persist mapping via set_mapping: {e}")
     
     def get_all_mappings(self) -> dict:
         """Get all mappings."""

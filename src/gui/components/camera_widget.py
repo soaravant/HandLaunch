@@ -5,7 +5,7 @@ Camera widget for displaying video feed and gesture detection overlay.
 import cv2
 import numpy as np
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton
-from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QThread
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QThread, QElapsedTimer
 from PyQt5.QtGui import QImage, QPixmap
 from loguru import logger
 
@@ -20,6 +20,14 @@ class CameraWidget(QWidget):
         super().__init__(parent)
         self.current_frame = None
         self.detection_overlay = True
+        self.countdown_active = False
+        self.countdown_ms = 2000
+        self.countdown_start = QElapsedTimer()
+        self.cooldown_active = False
+        self.cooldown_ms = 4000
+        self.cooldown_start = QElapsedTimer()
+        self.hint_gesture_name = None
+        self.hint_confidence = 0.0
         
         self.setup_ui()
         self.setup_timer()
@@ -43,22 +51,7 @@ class CameraWidget(QWidget):
         """)
         layout.addWidget(self.camera_label)
         
-        # Control buttons
-        button_layout = QHBoxLayout()
-        
-        self.overlay_button = QPushButton("Toggle Overlay")
-        self.overlay_button.setCheckable(True)
-        self.overlay_button.setChecked(True)
-        self.overlay_button.clicked.connect(self.toggle_overlay)
-        
-        self.snapshot_button = QPushButton("Take Snapshot")
-        self.snapshot_button.clicked.connect(self.take_snapshot)
-        
-        button_layout.addWidget(self.overlay_button)
-        button_layout.addWidget(self.snapshot_button)
-        button_layout.addStretch()
-        
-        layout.addLayout(button_layout)
+        # Removed extra controls per design (overlay toggle, snapshot)
     
     def setup_timer(self):
         """Setup update timer."""
@@ -89,6 +82,63 @@ class CameraWidget(QWidget):
                 Qt.SmoothTransformation
             )
             
+            # Draw countdown overlay if active
+            if self.countdown_active:
+                remaining_ms = max(0, self.countdown_ms - self.countdown_start.elapsed())
+                if remaining_ms == 0:
+                    self.countdown_active = False
+                else:
+                    from PyQt5.QtGui import QPainter, QColor, QFont, QPen
+                    pm = QPixmap(scaled_pixmap)
+                    painter = QPainter(pm)
+                    painter.setRenderHint(QPainter.Antialiasing)
+                    radius = 24
+                    margin = 12
+                    # Unified dark background capsule
+                    bg_width = radius*2 + 10 + 120
+                    bg_height = radius*2
+                    painter.setPen(Qt.NoPen)
+                    painter.setBrush(QColor(0, 0, 0, 150))
+                    painter.drawRoundedRect(margin, margin, bg_width, bg_height, 12, 12)
+                    # Timer circle
+                    painter.setPen(QColor(255, 255, 255))
+                    painter.setBrush(QColor(0, 0, 0, 0))
+                    painter.drawEllipse(margin, margin, radius*2, radius*2)
+                    # Progress arc
+                    pen = QPen(QColor(255,255,255))
+                    pen.setWidth(3)
+                    painter.setPen(pen)
+                    # Draw arc proportional to remaining time
+                    frac = max(0.0, min(1.0, remaining_ms / float(self.countdown_ms)))
+                    start_angle = 90 * 16
+                    span_angle = int(-360 * 16 * (1.0 - frac))
+                    painter.drawArc(margin, margin, radius*2, radius*2, start_angle, span_angle)
+                    painter.setPen(QColor(255, 255, 255))
+                    font = QFont()
+                    font.setPointSize(16)
+                    font.setBold(True)
+                    painter.setFont(font)
+                    seconds = int((remaining_ms + 999) / 1000)
+                    painter.drawText(margin, margin, radius*2, radius*2, Qt.AlignCenter, str(seconds))
+                    # Draw hint icon + label to the right of timer
+                    # Use gesture hint if available
+                    if getattr(self, 'hint_gesture_name', None):
+                        from PyQt5.QtGui import QIcon
+                        from pathlib import Path
+                        icon_path = Path(__file__).parent.parent.parent.parent / "resources" / "icons" / f"{self.hint_gesture_name}.png"
+                        text_x = margin + radius*2 + 10
+                        if icon_path.exists():
+                            icon = QIcon(str(icon_path))
+                            hint_pix = icon.pixmap(24, 24)
+                            painter.drawPixmap(text_x, margin + radius - 12, hint_pix)
+                            text_x += 28
+                        painter.setPen(QColor(255,255,255))
+                        painter.drawText(text_x, margin + radius + 6, self.hint_gesture_name.replace('_',' ').title())
+                    painter.end()
+                    scaled_pixmap = pm
+
+            # Cooldown bar removed per new design
+
             self.camera_label.setPixmap(scaled_pixmap)
     
     def toggle_overlay(self):
@@ -117,6 +167,34 @@ class CameraWidget(QWidget):
             return frame
         
         overlay_frame = frame.copy()
+        # Draw hint (icon + label) near top-left when countdown is active
+        try:
+            if self.countdown_active and gestures:
+                from PyQt5.QtGui import QPainter, QColor, QFont, QIcon
+                from pathlib import Path
+                painter = QPainter()
+                h, w, _ = overlay_frame.shape
+                painter.begin(QImage(overlay_frame.data, w, h, w*3, QImage.Format_RGB888))
+                painter.setRenderHint(QPainter.Antialiasing)
+                margin = 12
+                # Icon from resources/icons/<gesture>.png
+                gesture_name, confidence = gestures[0]
+                icon_path = Path(__file__).parent.parent.parent.parent / "resources" / "icons" / f"{gesture_name}.png"
+                if icon_path.exists():
+                    icon = QIcon(str(icon_path))
+                    pix = icon.pixmap(24, 24)
+                    painter.drawPixmap(margin, margin, pix)
+                    text_x = margin + 28
+                else:
+                    text_x = margin
+                painter.setPen(QColor(255, 255, 255))
+                font = QFont()
+                font.setPointSize(12)
+                painter.setFont(font)
+                painter.drawText(text_x, margin + 18, f"{gesture_name.replace('_',' ').title()}")
+                painter.end()
+        except Exception:
+            pass
         
         # Draw detected gestures
         for gesture_name, confidence in gestures:

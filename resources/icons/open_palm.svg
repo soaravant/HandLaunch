@@ -1,0 +1,15 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" fill="none"/>
+  <!-- Palm -->
+  <ellipse cx="16" cy="20" rx="8" ry="6" fill="#FFD700" stroke="#DAA520" stroke-width="1"/>
+  <!-- Thumb -->
+  <ellipse cx="8" cy="18" rx="3" ry="4" fill="#FFD700" stroke="#DAA520" stroke-width="1" transform="rotate(-20 8 18)"/>
+  <!-- Index finger -->
+  <ellipse cx="16" cy="8" rx="2" ry="6" fill="#FFD700" stroke="#DAA520" stroke-width="1"/>
+  <!-- Middle finger -->
+  <ellipse cx="18" cy="6" rx="2" ry="7" fill="#FFD700" stroke="#DAA520" stroke-width="1"/>
+  <!-- Ring finger -->
+  <ellipse cx="20" cy="8" rx="2" ry="6" fill="#FFD700" stroke="#DAA520" stroke-width="1"/>
+  <!-- Pinky -->
+  <ellipse cx="22" cy="10" rx="1.5" ry="5" fill="#FFD700" stroke="#DAA520" stroke-width="1"/>
+</svg>

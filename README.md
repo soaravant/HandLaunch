@@ -70,6 +70,22 @@ The application stores configuration in `data/config/user_config.json`. You can:
 
 See [DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md) for detailed development instructions.
 
+## Packaging
+
+Build cross-platform binaries with PyInstaller:
+
+```bash
+python scripts/build.py --target all --clean
+```
+
+Artifacts will be generated under `dist/`. Copy or link the latest ones to `website/downloads/` to update the download page, or point the links to GitHub Releases.
+
+## Website
+
+Static site is in `website/`. It detects the visitor OS and highlights the correct download.
+
+To deploy on Vercel, push to the repository with `vercel.json` present. The routes map `/` to `website/index.html`.
+
 ## Contributing
 
 1. Fork the repository

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HandLaunch — Gesture-based App Launcher</title>
+    <meta name="description" content="Download HandLaunch for macOS, Windows, or Linux. Instantly launch apps with hand gestures using your webcam." />
+    <link rel="preload" href="/assets/icons/open_palm.svg" as="image" type="image/svg+xml" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <div class="brand">
+          <img src="/assets/icons/open_palm.svg" alt="HandLaunch logo" class="brand-logo" />
+          <span class="brand-name">HandLaunch</span>
+        </div>
+        <nav class="nav">
+          <a href="#download">Download</a>
+          <a href="#how-it-works">How it works</a>
+          <a href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section id="hero" class="hero">
+        <div class="container hero-inner">
+          <div class="hero-copy">
+            <h1>Control apps with a gesture</h1>
+            <p class="subtitle">Fast, private, cross‑platform. No cloud. Just your hands.</p>
+            <div class="cta-row">
+              <a id="primary-download" class="btn btn-primary" href="#download">Download</a>
+              <a class="btn btn-secondary" href="#how-it-works">See how it works</a>
+            </div>
+            <p class="muted small" id="detected-os-note"></p>
+          </div>
+          <div class="hero-visual">
+            <div class="preview-card">
+              <img src="/assets/preview-camera.png" alt="Camera preview UI mock" onerror="this.style.display='none'" />
+              <div class="preview-fallback">
+                <img src="/assets/icons/pointing.svg" alt="Gesture icon" />
+                <span>Point & Launch</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="download" class="download">
+        <div class="container">
+          <h2>Download</h2>
+          <p class="muted">Your OS is detected automatically. You can also choose manually.</p>
+          <div class="download-grid">
+            <a id="btn-macos" class="download-card" href="https://github.com/soaravant/HandLaunch/releases/latest/download/HandLaunch-mac.zip" data-os="macos">
+              <div class="card-icon"><img src="/assets/icons/open_palm.svg" alt="macOS" /></div>
+              <div class="card-body">
+                <div class="card-title">macOS</div>
+                <div class="card-sub">Apple Silicon & Intel</div>
+              </div>
+              <div class="card-cta">.zip</div>
+            </a>
+            <a id="btn-windows" class="download-card" href="https://github.com/soaravant/HandLaunch/releases/latest/download/HandLaunch-win.exe" data-os="windows">
+              <div class="card-icon"><img src="/assets/icons/fist.svg" alt="Windows" /></div>
+              <div class="card-body">
+                <div class="card-title">Windows</div>
+                <div class="card-sub">Windows 10/11</div>
+              </div>
+              <div class="card-cta">.exe</div>
+            </a>
+            <a id="btn-linux" class="download-card" href="https://github.com/soaravant/HandLaunch/releases/latest/download/HandLaunch-linux.tar.gz" data-os="linux">
+              <div class="card-icon"><img src="/assets/icons/thumbs_up.svg" alt="Linux" /></div>
+              <div class="card-body">
+                <div class="card-title">Linux</div>
+                <div class="card-sub">AppImage or tar.gz</div>
+              </div>
+              <div class="card-cta">.tar.gz</div>
+            </a>
+          </div>
+          <div class="download-footnote small muted">
+            Looking for older builds? <a href="https://github.com/soaravant/HandLaunch/releases" target="_blank" rel="noopener">See releases</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="how-it-works" class="features">
+        <div class="container">
+          <h2>How it works</h2>
+          <div class="cards">
+            <article class="card">
+              <div class="card-media"><img src="/assets/icons/open_palm.svg" alt="Camera" /></div>
+              <h3>See</h3>
+              <p>Uses your webcam with on-device processing for privacy.</p>
+            </article>
+            <article class="card">
+              <div class="card-media"><img src="/assets/icons/peace_sign.svg" alt="Gestures" /></div>
+              <h3>Understand</h3>
+              <p>Recognizes common gestures like open palm, fist, peace sign, and more.</p>
+            </article>
+            <article class="card">
+              <div class="card-media"><img src="/assets/icons/pointing.svg" alt="Launch" /></div>
+              <h3>Launch</h3>
+              <p>Map gestures to apps. One gesture, instant action.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div class="foot-left">
+          <span class="brand-name">HandLaunch</span>
+          <span class="muted">© <span id="year"></span></span>
+        </div>
+        <div class="foot-right">
+          <a href="#download">Download</a>
+          <a href="#how-it-works">How it works</a>
+          <a href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="/script.js" defer></script>
+  </body>
+  </html>
+
+

@@ -119,8 +119,11 @@ class AppLauncher:
             if app_path.startswith('open -a'):
                 # Use open command
                 subprocess.Popen(app_path.split(), shell=False)
+            elif app_path.endswith('.app'):
+                # Launch .app bundle using open command
+                subprocess.Popen(['open', app_path], shell=False)
             else:
-                # Direct executable
+                # Try to launch as executable
                 subprocess.Popen([app_path], shell=False)
             return True
         except Exception as e:

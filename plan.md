@@ -354,3 +354,23 @@ HandLaunch/
 
 This plan provides a comprehensive roadmap for developing the HandLaunch desktop application, with clear phases, deliverables, and success criteria.
 
+## Deployment & Website TODOs
+
+- [x] Implement robust OS default app mappings in launcher and GUI
+- [x] Persist gesture mappings via ConfigManager and wire AppMapper signals
+- [ ] Add PyInstaller build script for macOS/Windows/Linux and move outputs to `dist/`
+- [ ] Create static website (`website/`) with instant OS detection and prominent Download CTA
+  - [ ] Detect macOS/Windows/Linux in JS and highlight correct download
+  - [ ] Provide manual OS selector (tabs) as fallback
+  - [ ] Link to latest build artifacts: `.dmg`/`.pkg`, `.exe`/`.msi`, `.AppImage`/`.deb`
+- [ ] Add visual explanation section under downloads (no gradients)
+  - [ ] Use existing `resources/icons` and new `resources/images` in cards
+  - [ ] Include short 1-2 line descriptions per feature (Camera, Gestures, Mapping)
+  - [ ] Add professional, subtle animations (fade/slide/scale), prefers-reduced-motion aware
+- [ ] Add `vercel.json` and deploy website to Vercel
+  - [ ] Configure clean routes and asset caching
+  - [ ] Set `website/` as project root for deployment
+- [ ] Automate release packaging
+  - [ ] Scripts to build per-OS artifacts
+  - [ ] Publish artifacts to GitHub Releases and update website links
+

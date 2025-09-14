@@ -73,36 +73,61 @@ class GestureDetector:
     def _classify_gesture(self, landmarks: np.ndarray) -> Tuple[Optional[str], float]:
         """Classify gesture based on landmarks."""
         try:
-            # Simple gesture classification based on finger positions
-            # This is a basic implementation - can be enhanced with ML models
-            
-            # Extract key points
-            thumb_tip = landmarks[3:6]  # Thumb tip
-            index_tip = landmarks[6:9]  # Index finger tip
-            middle_tip = landmarks[9:12]  # Middle finger tip
-            ring_tip = landmarks[12:15]  # Ring finger tip
-            pinky_tip = landmarks[15:18]  # Pinky tip
-            
-            # Calculate finger distances from palm center
-            palm_center = landmarks[0:3]  # Wrist as palm center
-            
-            thumb_dist = np.linalg.norm(thumb_tip - palm_center)
-            index_dist = np.linalg.norm(index_tip - palm_center)
-            middle_dist = np.linalg.norm(middle_tip - palm_center)
-            ring_dist = np.linalg.norm(ring_tip - palm_center)
-            pinky_dist = np.linalg.norm(pinky_tip - palm_center)
-            
-            # Simple gesture recognition
-            if self._is_open_palm(thumb_dist, index_dist, middle_dist, ring_dist, pinky_dist):
-                return "open_palm", 0.9
-            elif self._is_fist(thumb_dist, index_dist, middle_dist, ring_dist, pinky_dist):
+            # Improved classification using correct MediaPipe indices and relative distances
+            # MediaPipe landmark indices: 0-wrist, 4/8/12/16/20 tips, 6/10/14/18 PIPs, 5/9/13/17 MCPs
+
+            def lm(idx: int) -> np.ndarray:
+                s = idx * 3
+                return landmarks[s:s+3]
+
+            wrist = lm(0)
+            thumb_tip, index_tip, middle_tip, ring_tip, pinky_tip = lm(4), lm(8), lm(12), lm(16), lm(20)
+            index_pip, middle_pip, ring_pip, pinky_pip = lm(6), lm(10), lm(14), lm(18)
+            index_mcp, middle_mcp, ring_mcp, pinky_mcp = lm(5), lm(9), lm(13), lm(17)
+
+            # Use palm size as scale (wrist to middle_mcp)
+            scale = np.linalg.norm(middle_mcp - wrist)
+            if scale < 1e-6:
+                scale = 1.0
+
+            # Distances to wrist
+            thumb_dist = np.linalg.norm(thumb_tip - wrist)
+            index_dist = np.linalg.norm(index_tip - wrist)
+            middle_dist = np.linalg.norm(middle_tip - wrist)
+            ring_dist = np.linalg.norm(ring_tip - wrist)
+            pinky_dist = np.linalg.norm(pinky_tip - wrist)
+
+            # PIP distances to wrist for relative extension
+            index_pip_dist = np.linalg.norm(index_pip - wrist)
+            middle_pip_dist = np.linalg.norm(middle_pip - wrist)
+            ring_pip_dist = np.linalg.norm(ring_pip - wrist)
+            pinky_pip_dist = np.linalg.norm(pinky_pip - wrist)
+
+            # Consider a finger extended if the tip is significantly further than its PIP
+            # The margin is relative to palm size for scale invariance
+            margin = 0.35 * scale
+            index_ext = (index_dist - index_pip_dist) > margin
+            middle_ext = (middle_dist - middle_pip_dist) > margin
+            ring_ext = (ring_dist - ring_pip_dist) > margin
+            pinky_ext = (pinky_dist - pinky_pip_dist) > margin
+            # Thumb: compare tip to wrist versus middle_mcp to wrist
+            thumb_ext = (thumb_dist - np.linalg.norm(middle_mcp - wrist)) > (0.15 * scale)
+
+            # Compute simple confidence as proportion of criteria satisfied
+            def confidence_from_bools(vals: list) -> float:
+                return sum(1 for v in vals if v) / max(1, len(vals))
+
+            # Order: specific gestures first, open palm last
+            if not (index_ext or middle_ext or ring_ext or pinky_ext or thumb_ext):
                 return "fist", 0.9
-            elif self._is_peace_sign(index_dist, middle_dist, ring_dist, pinky_dist):
-                return "peace_sign", 0.8
-            elif self._is_thumbs_up(thumb_dist, index_dist, middle_dist, ring_dist, pinky_dist):
-                return "thumbs_up", 0.8
-            elif self._is_pointing(index_dist, middle_dist, ring_dist, pinky_dist):
-                return "pointing", 0.7
+            if thumb_ext and not (index_ext or middle_ext or ring_ext or pinky_ext):
+                return "thumbs_up", confidence_from_bools([thumb_ext])
+            if index_ext and not (middle_ext or ring_ext or pinky_ext):
+                return "pointing", confidence_from_bools([index_ext, not middle_ext, not ring_ext, not pinky_ext])
+            if index_ext and middle_ext and not ring_ext and not pinky_ext:
+                return "peace_sign", confidence_from_bools([index_ext, middle_ext, not ring_ext, not pinky_ext])
+            if thumb_ext and index_ext and middle_ext and ring_ext and pinky_ext:
+                return "open_palm", 0.9
             
             return None, 0.0
             

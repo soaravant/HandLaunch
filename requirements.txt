@@ -28,3 +28,4 @@ mypy==1.6.1
 
 # Optional: For building executables
 pyinstaller==6.1.0
+watchdog==5.0.2
