@@ -8,6 +8,7 @@
     { "source": "/", "destination": "/website/index.html" },
     { "source": "/styles.css", "destination": "/website/styles.css" },
     { "source": "/script.js", "destination": "/website/script.js" },
+    { "source": "/favicon.svg", "destination": "/website/favicon.svg" },
     { "source": "/assets/(.*)", "destination": "/website/assets/$1" },
     { "source": "/downloads/(.*)", "destination": "/website/downloads/$1" }
   ],
