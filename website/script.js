@@ -78,8 +78,17 @@
     
     Object.keys(apps).forEach(gesture => {
       const app = apps[gesture];
-      const iconEl = document.getElementById(`${gesture.replace('_', '-')}-app`);
-      const nameEl = document.getElementById(`${gesture.replace('_', '-')}-name`);
+      // Map gesture names to correct HTML IDs
+      const idMap = {
+        'open_palm': 'open-palm',
+        'fist': 'fist', 
+        'peace_sign': 'peace',
+        'thumbs_up': 'thumbs',
+        'pointing': 'pointing'
+      };
+      const gestureId = idMap[gesture] || gesture.replace('_', '-');
+      const iconEl = document.getElementById(`${gestureId}-app`);
+      const nameEl = document.getElementById(`${gestureId}-name`);
       
       if (iconEl) {
         const img = document.createElement('img');
