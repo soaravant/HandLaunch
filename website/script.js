@@ -42,9 +42,9 @@
     const btn = $('#primary-download');
     if (!btn || !os) return;
     const map = {
-      macos: 'https://github.com/soaravant/HandLaunch/releases/latest/download/HandLaunch-mac.zip',
-      windows: 'https://github.com/soaravant/HandLaunch/releases/latest/download/HandLaunch-win.exe',
-      linux: 'https://github.com/soaravant/HandLaunch/releases/latest/download/HandLaunch-linux.tar.gz'
+      macos: '/releases/macos/HandLaunch-mac.dmg',
+      windows: '/releases/windows/HandLaunch-win.exe',
+      linux: '/releases/linux/HandLaunch-linux.AppImage'
     };
     btn.href = map[os];
   }

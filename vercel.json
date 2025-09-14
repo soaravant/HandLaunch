@@ -2,7 +2,8 @@
   "version": 2,
   "builds": [
     { "src": "website/**", "use": "@vercel/static" },
-    { "src": "resources/icons/**", "use": "@vercel/static" }
+    { "src": "resources/icons/**", "use": "@vercel/static" },
+    { "src": "releases/**", "use": "@vercel/static" }
   ],
   "rewrites": [
     { "source": "/", "destination": "/website/index.html" },
@@ -10,7 +11,8 @@
     { "source": "/script.js", "destination": "/website/script.js" },
     { "source": "/favicon.svg", "destination": "/website/favicon.svg" },
     { "source": "/assets/(.*)", "destination": "/website/assets/$1" },
-    { "source": "/downloads/(.*)", "destination": "/website/downloads/$1" }
+    { "source": "/downloads/(.*)", "destination": "/website/downloads/$1" },
+    { "source": "/releases/(.*)", "destination": "/website/releases/$1" }
   ],
   "headers": [
     {
