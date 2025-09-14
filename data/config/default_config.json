@@ -1,0 +1,39 @@
+{
+    "camera": {
+        "index": 0,
+        "width": 640,
+        "height": 480,
+        "fps": 30,
+        "brightness": 0.5,
+        "contrast": 0.5,
+        "saturation": 0.5
+    },
+    "gesture_detection": {
+        "min_confidence": 0.7,
+        "min_tracking_confidence": 0.5,
+        "max_hands": 2,
+        "gesture_threshold": 0.8,
+        "detection_enabled": true
+    },
+    "application": {
+        "start_minimized": false,
+        "minimize_to_tray": true,
+        "auto_start": false,
+        "theme": "dark",
+        "language": "en"
+    },
+    "gesture_mappings": {
+        "open_palm": "",
+        "fist": "",
+        "peace_sign": "",
+        "thumbs_up": "",
+        "pointing": ""
+    },
+    "logging": {
+        "level": "INFO",
+        "file_logging": true,
+        "console_logging": true,
+        "max_log_size": "10MB",
+        "backup_count": 5
+    }
+}
