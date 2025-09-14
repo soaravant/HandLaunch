@@ -60,10 +60,10 @@
       },
       windows: {
         open_palm: { name: "Chrome", icon: "/assets/icons/chrome.png" },
-        fist: { name: "File Explorer", icon: "/assets/icons/explorer.png" },
+        fist: { name: "Explorer", icon: "/assets/icons/explorer.png" },
         peace_sign: { name: "Firefox", icon: "/assets/icons/firefox.png" },
-        thumbs_up: { name: "Windows Media Player", icon: "/assets/icons/wmp.png" },
-        pointing: { name: "Notepad", icon: "/assets/icons/notepad.png" }
+        thumbs_up: { name: "Notepad", icon: "/assets/icons/notepad.png" },
+        pointing: { name: "Windows Media Player", icon: "/assets/icons/wmp.png" }
       },
       linux: {
         open_palm: { name: "Firefox", icon: "/assets/icons/firefox.png" },
