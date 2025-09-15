@@ -7,8 +7,7 @@
   const note = $('#detected-os-note');
   if (note) note.textContent = os ? `Detected: ${osLabel(os)}` : '';
 
-  highlightDownload(os);
-  rewritePrimaryCTA(os);
+  highlightCommand(os);
   updateAppPreviews(os);
   startGestureAnimation();
 
@@ -30,23 +29,12 @@
     }
   }
 
-  function highlightDownload(os){
-    const cards = document.querySelectorAll('.download-card');
+  function highlightCommand(os){
+    const cards = document.querySelectorAll('.command-card');
     cards.forEach(c=>c.classList.remove('active'));
     if (!os) return;
-    const el = document.querySelector(`.download-card[data-os="${os}"]`);
+    const el = document.querySelector(`.command-card[data-os="${os}"]`);
     if (el) el.classList.add('active');
-  }
-
-  function rewritePrimaryCTA(os){
-    const btn = $('#primary-download');
-    if (!btn || !os) return;
-    const map = {
-      macos: '/releases/macos/HandLaunch-mac.dmg',
-      windows: '/releases/windows/HandLaunch-win.exe',
-      linux: '/releases/linux/HandLaunch-linux.AppImage'
-    };
-    btn.href = map[os];
   }
 
   function updateAppPreviews(os){
@@ -135,12 +123,71 @@
   initTechCanvas();
 })();
 
+// Copy command function
+function copyCommand(commandId) {
+  // Define the actual commands
+  const commands = {
+    'macos-command': 'git clone https://github.com/soaravant/HandLaunch.git && cd HandLaunch && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt && python src/main.py',
+    'windows-command': 'git clone https://github.com/soaravant/HandLaunch.git && cd HandLaunch && python -m venv venv && venv\\Scripts\\activate && pip install -r requirements.txt && python src\\main.py',
+    'linux-command': 'git clone https://github.com/soaravant/HandLaunch.git && cd HandLaunch && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt && python src/main.py'
+  };
+  
+  const commandText = commands[commandId];
+  if (!commandText) return;
+  
+  // Try to use the modern clipboard API first
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(commandText).then(() => {
+      const commandElement = document.getElementById(commandId);
+      showCopyFeedback(commandElement);
+    }).catch(() => {
+      const commandElement = document.getElementById(commandId);
+      fallbackCopyTextToClipboard(commandText, commandElement);
+    });
+  } else {
+    const commandElement = document.getElementById(commandId);
+    fallbackCopyTextToClipboard(commandText, commandElement);
+  }
+}
+
+function fallbackCopyTextToClipboard(text, element) {
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.style.position = "fixed";
+  textArea.style.left = "-999999px";
+  textArea.style.top = "-999999px";
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  
+  try {
+    document.execCommand('copy');
+    showCopyFeedback(element);
+  } catch (err) {
+    console.error('Failed to copy text: ', err);
+  }
+  
+  document.body.removeChild(textArea);
+}
+
+function showCopyFeedback(element) {
+  const button = element.parentElement.querySelector('.copy-btn');
+  const originalText = button.textContent;
+  button.textContent = '✓';
+  button.style.background = '#10b981';
+  
+  setTimeout(() => {
+    button.textContent = originalText;
+    button.style.background = '';
+  }, 2000);
+}
+
 function initTechCanvas() {
   const canvas = document.getElementById('tech-canvas');
   if (!canvas) return;
   
   const ctx = canvas.getContext('2d');
-  let scale = 1;
+  let scale = 0.6; // More zoomed out by default
   let offsetX = 0;
   let offsetY = 0;
   let isDragging = false;
@@ -151,139 +198,152 @@ function initTechCanvas() {
   const detailsEl = document.getElementById('node-details');
   const detailsTitle = detailsEl?.querySelector('.node-title');
   const detailsDesc = detailsEl?.querySelector('.node-desc');
+  const categoriesEl = document.getElementById('tech-categories');
 
-  // Technology nodes data - reorganized with better spacing
+  // Category mapping for highlighting
+  const categoryMap = {
+    'language': 'Core Language',
+    'computer-vision': 'Computer Vision', 
+    'ml': 'Machine Learning',
+    'gui': 'User Interface',
+    'data': 'Data Processing',
+    'image': 'User Interface',
+    'build': 'Build & Deploy',
+    'system': 'System Integration'
+  };
+
+  // Technology nodes data - reorganized with much better spacing and logical flow
   const techNodes = [
     {
       id: 'python',
       name: 'Python',
       category: 'language',
-      x: 400, y: 300,
+      x: 600, y: 450,
       color: '#3776ab',
-      description: 'The foundation of HandLaunch. Python orchestrates the entire gesture recognition pipeline, from camera capture to app launching. It provides the runtime environment that binds all components together, ensuring cross-platform compatibility and enabling rapid development of the gesture detection algorithms.',
-      connections: ['opencv', 'mediapipe', 'pyqt5', 'numpy', 'tensorflow']
+      description: '• Core runtime environment for the entire application\n• Orchestrates the complete gesture recognition pipeline\n• Ensures cross-platform compatibility across macOS, Windows, and Linux\n• Provides the foundation that binds all components together\n• Enables rapid development and testing of gesture detection algorithms',
+      connections: ['opencv', 'mediapipe', 'pyqt5', 'numpy', 'tensorflow', 'scikit-learn', 'pillow', 'pyinstaller', 'psutil']
     },
     {
       id: 'opencv',
       name: 'OpenCV',
       category: 'computer-vision',
-      x: 150, y: 150,
+      x: 200, y: 200,
       color: '#5c3ee8',
-      description: 'The eyes of HandLaunch. OpenCV handles real-time camera feed processing, image preprocessing, and computer vision operations. It captures frames from your webcam, applies noise reduction and enhancement filters, and prepares the visual data for gesture analysis. Essential for maintaining consistent image quality across different lighting conditions.',
+      description: '• Real-time camera feed capture and processing\n• Image preprocessing and enhancement filters\n• Noise reduction and lighting condition adaptation\n• Frame rate optimization for smooth performance\n• Cross-platform camera interface management',
       connections: ['python', 'mediapipe', 'numpy']
     },
     {
       id: 'mediapipe',
       name: 'MediaPipe',
       category: 'ml',
-      x: 300, y: 100,
+      x: 400, y: 150,
       color: '#4285f4',
-      description: 'The brain of gesture recognition. MediaPipe\'s hand landmark detection identifies 21 key points on each hand in real-time. It transforms raw camera frames into structured hand pose data, enabling precise gesture classification. This is where your hand movements become actionable commands that the system can understand and respond to.',
+      description: '• Hand landmark detection with 21 key points per hand\n• Real-time hand pose estimation and tracking\n• Converts camera frames to structured hand data\n• Enables precise gesture classification\n• Optimized for mobile and desktop performance',
       connections: ['python', 'opencv', 'tensorflow']
-    },
-    {
-      id: 'pyqt5',
-      name: 'PyQt5',
-      category: 'gui',
-      x: 650, y: 200,
-      color: '#41cd52',
-      description: 'The user interface layer. PyQt5 creates the intuitive desktop application where users configure gesture mappings, train custom gestures, and monitor the system. It provides the settings panel, gesture trainer, and real-time camera preview, making HandLaunch accessible to users without technical expertise.',
-      connections: ['python']
     },
     {
       id: 'tensorflow',
       name: 'TensorFlow',
       category: 'ml',
-      x: 200, y: 400,
+      x: 350, y: 650,
       color: '#ff6f00',
-      description: 'The machine learning engine. TensorFlow powers the gesture classification models that distinguish between different hand poses. It processes the hand landmarks from MediaPipe and determines whether you\'re showing a fist, open palm, peace sign, or other gestures. The models run entirely on-device for privacy and speed.',
+      description: '• Machine learning engine for gesture classification\n• Processes hand landmarks to identify gestures\n• Distinguishes between fist, open palm, peace sign, etc.\n• Runs entirely on-device for privacy and speed\n• Supports both training and inference modes',
       connections: ['python', 'mediapipe', 'numpy']
     },
     {
       id: 'numpy',
       name: 'NumPy',
       category: 'data',
-      x: 100, y: 300,
+      x: 150, y: 450,
       color: '#4dabcf',
-      description: 'The mathematical backbone. NumPy handles all numerical computations, from processing hand landmark coordinates to calculating gesture similarity scores. It provides efficient array operations for real-time data processing, ensuring smooth performance even with complex gesture recognition algorithms running at 30+ FPS.',
-      connections: ['python', 'opencv', 'tensorflow']
+      description: '• Mathematical backbone for all computations\n• Handles hand landmark coordinate processing\n• Calculates gesture similarity scores and metrics\n• Efficient array operations for real-time processing\n• Optimized for 30+ FPS performance requirements',
+      connections: ['python', 'opencv', 'tensorflow', 'scikit-learn']
     },
     {
       id: 'scikit-learn',
       name: 'Scikit-learn',
       category: 'ml',
-      x: 300, y: 500,
+      x: 450, y: 750,
       color: '#f7931e',
-      description: 'The gesture learning system. Scikit-learn enables users to train custom gestures by learning from their unique hand movements. It uses machine learning algorithms to create personalized gesture models, adapting to individual variations in hand shape and movement patterns for more accurate recognition.',
-      connections: ['python', 'numpy']
+      description: '• Custom gesture training and learning system\n• Machine learning algorithms for personalized models\n• Adapts to individual hand shape variations\n• Creates user-specific gesture recognition patterns\n• Enables continuous learning and improvement',
+      connections: ['python', 'numpy', 'tensorflow']
+    },
+    {
+      id: 'pyqt5',
+      name: 'PyQt5',
+      category: 'gui',
+      x: 950, y: 300,
+      color: '#41cd52',
+      description: '• Desktop application user interface\n• Gesture mapping configuration panel\n• Real-time camera preview and monitoring\n• Custom gesture training interface\n• Settings and preferences management',
+      connections: ['python', 'pillow']
     },
     {
       id: 'pillow',
       name: 'Pillow',
       category: 'image',
-      x: 500, y: 400,
+      x: 800, y: 550,
       color: '#f7b731',
-      description: 'The image processing toolkit. Pillow handles icon and image manipulation for the user interface, processes gesture training data, and manages visual assets. It ensures consistent image quality and format compatibility across different operating systems, contributing to the polished user experience.',
-      connections: ['python', 'opencv']
+      description: '• Image processing and manipulation toolkit\n• Icon and visual asset management\n• Gesture training data image processing\n• Cross-platform image format compatibility\n• UI visual enhancement and optimization',
+      connections: ['python', 'opencv', 'pyqt5']
     },
     {
       id: 'pyinstaller',
       name: 'PyInstaller',
       category: 'build',
-      x: 700, y: 400,
+      x: 1000, y: 550,
       color: '#9b59b6',
-      description: 'The deployment architect. PyInstaller packages the entire HandLaunch application into standalone executables for macOS, Windows, and Linux. It bundles all dependencies, models, and resources into a single distributable file, making HandLaunch easy to install and run without requiring Python or complex setup procedures.',
-      connections: ['python']
+      description: '• Application packaging and deployment\n• Creates standalone executables for all platforms\n• Bundles all dependencies and resources\n• Generates macOS .dmg, Windows .exe, Linux .AppImage\n• Enables easy installation without Python setup',
+      connections: ['python', 'pyqt5']
     },
     {
       id: 'psutil',
       name: 'psutil',
       category: 'system',
-      x: 600, y: 500,
+      x: 900, y: 700,
       color: '#e74c3c',
-      description: 'The system integration layer. psutil enables HandLaunch to interact with the operating system, launching applications, monitoring system resources, and managing processes. It provides the bridge between gesture recognition and actual app launching, ensuring reliable cross-platform application management.',
-      connections: ['python']
+      description: '• System integration and process management\n• Application launching and process control\n• System resource monitoring and optimization\n• Cross-platform OS interaction\n• Bridge between gestures and app execution',
+      connections: ['python', 'pyqt5']
     }
   ];
 
-  // Grouping boxes for organizing components
+  // Grouping boxes for organizing components - updated for better layout with much more spread out nodes
   const groupBoxes = [
     {
       title: 'Computer Vision & ML',
-      x: 50, y: 50,
-      width: 350, height: 200,
+      x: 100, y: 100,
+      width: 350, height: 400,
       color: 'rgba(66, 133, 244, 0.1)',
       borderColor: 'rgba(66, 133, 244, 0.3)',
-      nodes: ['opencv', 'mediapipe', 'tensorflow', 'numpy']
-    },
-    {
-      title: 'User Interface',
-      x: 600, y: 150,
-      width: 200, height: 100,
-      color: 'rgba(65, 205, 82, 0.1)',
-      borderColor: 'rgba(65, 205, 82, 0.3)',
-      nodes: ['pyqt5']
+      nodes: ['opencv', 'mediapipe', 'numpy']
     },
     {
       title: 'Core Runtime',
-      x: 350, y: 250,
-      width: 150, height: 100,
+      x: 520, y: 370,
+      width: 160, height: 160,
       color: 'rgba(55, 118, 171, 0.1)',
       borderColor: 'rgba(55, 118, 171, 0.3)',
       nodes: ['python']
     },
     {
+      title: 'User Interface',
+      x: 880, y: 220,
+      width: 200, height: 160,
+      color: 'rgba(65, 205, 82, 0.1)',
+      borderColor: 'rgba(65, 205, 82, 0.3)',
+      nodes: ['pyqt5']
+    },
+    {
       title: 'Training & Learning',
-      x: 250, y: 450,
-      width: 200, height: 100,
+      x: 280, y: 580,
+      width: 250, height: 250,
       color: 'rgba(247, 147, 30, 0.1)',
       borderColor: 'rgba(247, 147, 30, 0.3)',
-      nodes: ['scikit-learn']
+      nodes: ['tensorflow', 'scikit-learn']
     },
     {
       title: 'System Integration',
-      x: 450, y: 350,
-      width: 300, height: 200,
+      x: 720, y: 470,
+      width: 400, height: 280,
       color: 'rgba(231, 76, 60, 0.1)',
       borderColor: 'rgba(231, 76, 60, 0.3)',
       nodes: ['pillow', 'pyinstaller', 'psutil']
@@ -296,11 +356,17 @@ function initTechCanvas() {
   canvas.addEventListener('mouseup', handleMouseUp);
   canvas.addEventListener('wheel', handleWheel);
   canvas.addEventListener('click', handleClick);
+  canvas.addEventListener('mouseleave', () => {
+    hoveredNode = null;
+    highlightCategory(null);
+    draw();
+  });
 
   // Control buttons
-  document.getElementById('zoom-in')?.addEventListener('click', () => zoom(1.2));
-  document.getElementById('zoom-out')?.addEventListener('click', () => zoom(0.8));
+  document.getElementById('zoom-in')?.addEventListener('click', () => zoom(1.1));
+  document.getElementById('zoom-out')?.addEventListener('click', () => zoom(0.9));
   document.getElementById('reset-view')?.addEventListener('click', resetView);
+  document.getElementById('toggle-categories')?.addEventListener('click', toggleCategories);
 
   function handleMouseDown(e) {
     isDragging = true;
@@ -323,6 +389,7 @@ function initTechCanvas() {
       if (node !== hoveredNode) {
         hoveredNode = node;
         canvas.style.cursor = node ? 'pointer' : 'grab';
+        highlightCategory(node);
         draw();
       }
     }
@@ -333,13 +400,35 @@ function initTechCanvas() {
     canvas.style.cursor = hoveredNode ? 'pointer' : 'grab';
   }
 
+  function highlightCategory(node) {
+    if (!categoriesEl) return;
+    
+    // Clear all highlights
+    const categoryItems = categoriesEl.querySelectorAll('.category-item');
+    categoryItems.forEach(item => {
+      item.classList.remove('highlighted');
+    });
+    
+    // Highlight the category for the hovered node
+    if (node && categoryMap[node.category]) {
+      const categoryName = categoryMap[node.category];
+      const categoryItem = Array.from(categoryItems).find(item => 
+        item.querySelector('.category-label').textContent === categoryName
+      );
+      if (categoryItem) {
+        categoryItem.classList.add('highlighted');
+      }
+    }
+  }
+
   function handleWheel(e) {
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
     
-    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+    // Much slower zoom - smaller increments
+    const zoomFactor = e.deltaY > 0 ? 0.95 : 1.05;
     zoom(zoomFactor, mouseX, mouseY);
   }
 
@@ -359,7 +448,8 @@ function initTechCanvas() {
       if (selectedNode && detailsEl && detailsTitle && detailsDesc) {
         detailsEl.classList.remove('hidden');
         detailsTitle.textContent = selectedNode.name;
-        detailsDesc.textContent = selectedNode.description;
+        // Convert newlines to HTML line breaks for proper bullet point display
+        detailsDesc.innerHTML = selectedNode.description.replace(/\n/g, '<br>');
       } else if (detailsEl) {
         detailsEl.classList.add('hidden');
       }
@@ -378,11 +468,23 @@ function initTechCanvas() {
   }
 
   function resetView() {
-    scale = 1;
+    scale = 0.6; // More zoomed out by default
     offsetX = 0;
     offsetY = 0;
     selectedNode = null;
     draw();
+  }
+
+  function toggleCategories() {
+    if (!categoriesEl) return;
+    categoriesEl.classList.toggle('hidden');
+    
+    // Update button text to show current state
+    const toggleBtn = document.getElementById('toggle-categories');
+    if (toggleBtn) {
+      toggleBtn.textContent = categoriesEl.classList.contains('hidden') ? '📋' : '✕';
+      toggleBtn.title = categoriesEl.classList.contains('hidden') ? 'Show Categories' : 'Hide Categories';
+    }
   }
 
   function getNodeAt(x, y) {
@@ -421,14 +523,21 @@ function initTechCanvas() {
       ctx.fillText(box.title, box.x + 8, box.y + 8);
     }
 
-    // Draw rectangular connections with corners
-    ctx.strokeStyle = 'rgba(77, 124, 255, 0.5)';
-    ctx.lineWidth = 2;
+    // Draw connections with improved logic to avoid duplicates
+    ctx.strokeStyle = 'rgba(77, 124, 255, 0.4)';
+    ctx.lineWidth = 1.5;
+    const drawnConnections = new Set();
+    
     for (let node of techNodes) {
       for (let connectionId of node.connections) {
         const targetNode = techNodes.find(n => n.id === connectionId);
         if (targetNode) {
-          drawRectangularConnection(node, targetNode);
+          // Create a unique key for this connection to avoid duplicates
+          const connectionKey = [node.id, targetNode.id].sort().join('-');
+          if (!drawnConnections.has(connectionKey)) {
+            drawnConnections.add(connectionKey);
+            drawRectangularConnection(node, targetNode);
+          }
         }
       }
     }
@@ -488,71 +597,38 @@ function initTechCanvas() {
     ctx.restore();
   }
 
-  // Helper: draw rectangular connection with corners
+  // Helper: draw clean straight connections
   function drawRectangularConnection(sourceNode, targetNode) {
     const dx = targetNode.x - sourceNode.x;
     const dy = targetNode.y - sourceNode.y;
-    const absDx = Math.abs(dx);
-    const absDy = Math.abs(dy);
+    const distance = Math.sqrt(dx * dx + dy * dy);
     
-    // Determine connection style based on distance and direction
-    let path = [];
-    
-    if (absDx > absDy) {
-      // Horizontal connection with vertical offset
-      const midX = sourceNode.x + dx / 2;
-      const offsetY = dy > 0 ? 30 : -30;
+    // Only draw connections for reasonable distances to avoid clutter
+    if (distance > 50) {
+      // Draw straight line connection
+      ctx.beginPath();
+      ctx.moveTo(sourceNode.x, sourceNode.y);
+      ctx.lineTo(targetNode.x, targetNode.y);
+      ctx.stroke();
       
-      path = [
-        { x: sourceNode.x, y: sourceNode.y },
-        { x: midX, y: sourceNode.y },
-        { x: midX, y: sourceNode.y + offsetY },
-        { x: midX, y: targetNode.y - offsetY },
-        { x: midX, y: targetNode.y },
-        { x: targetNode.x, y: targetNode.y }
-      ];
-    } else {
-      // Vertical connection with horizontal offset
-      const midY = sourceNode.y + dy / 2;
-      const offsetX = dx > 0 ? 30 : -30;
+      // Draw simple arrow at the end
+      const angle = Math.atan2(dy, dx);
+      const arrowLength = 10;
+      const arrowAngle = Math.PI / 6;
       
-      path = [
-        { x: sourceNode.x, y: sourceNode.y },
-        { x: sourceNode.x, y: midY },
-        { x: sourceNode.x + offsetX, y: midY },
-        { x: targetNode.x - offsetX, y: midY },
-        { x: targetNode.x, y: midY },
-        { x: targetNode.x, y: targetNode.y }
-      ];
+      ctx.beginPath();
+      ctx.moveTo(targetNode.x, targetNode.y);
+      ctx.lineTo(
+        targetNode.x - arrowLength * Math.cos(angle - arrowAngle),
+        targetNode.y - arrowLength * Math.sin(angle - arrowAngle)
+      );
+      ctx.moveTo(targetNode.x, targetNode.y);
+      ctx.lineTo(
+        targetNode.x - arrowLength * Math.cos(angle + arrowAngle),
+        targetNode.y - arrowLength * Math.sin(angle + arrowAngle)
+      );
+      ctx.stroke();
     }
-    
-    // Draw the path
-    ctx.beginPath();
-    ctx.moveTo(path[0].x, path[0].y);
-    for (let i = 1; i < path.length; i++) {
-      ctx.lineTo(path[i].x, path[i].y);
-    }
-    ctx.stroke();
-    
-    // Draw arrow at the end
-    const lastPoint = path[path.length - 1];
-    const secondLastPoint = path[path.length - 2];
-    const angle = Math.atan2(lastPoint.y - secondLastPoint.y, lastPoint.x - secondLastPoint.x);
-    const arrowLength = 8;
-    const arrowAngle = Math.PI / 6;
-    
-    ctx.beginPath();
-    ctx.moveTo(lastPoint.x, lastPoint.y);
-    ctx.lineTo(
-      lastPoint.x - arrowLength * Math.cos(angle - arrowAngle),
-      lastPoint.y - arrowLength * Math.sin(angle - arrowAngle)
-    );
-    ctx.moveTo(lastPoint.x, lastPoint.y);
-    ctx.lineTo(
-      lastPoint.x - arrowLength * Math.cos(angle + arrowAngle),
-      lastPoint.y - arrowLength * Math.sin(angle + arrowAngle)
-    );
-    ctx.stroke();
   }
 
   // Helper: rounded rectangle path

@@ -16,7 +16,7 @@
           <span class="brand-name">HandLaunch</span>
         </div>
         <nav class="nav">
-          <a href="#download">Download</a>
+          <a href="#download">Get Started</a>
           <a href="#how-it-works">How it works</a>
           <a href="#built-with">Built With</a>
           <a href="https://github.com/soaravant/HandLaunch" target="_blank" rel="noopener">GitHub</a>
@@ -31,7 +31,7 @@
             <h1>Control apps with a gesture</h1>
             <p class="subtitle">Fast, private, cross‑platform. No cloud. Just your hands.</p>
             <div class="cta-row">
-              <a id="primary-download" class="btn btn-primary" href="#download">Download</a>
+              <a id="primary-download" class="btn btn-primary" href="#download">Get Started</a>
               <a class="btn btn-secondary" href="#how-it-works">See how it works</a>
             </div>
             <p class="muted small" id="detected-os-note"></p>
@@ -82,61 +82,42 @@
 
       <section id="download" class="download">
         <div class="container">
-          <h2>Download</h2>
-          <p class="muted">Your OS is detected automatically. You can also choose manually.</p>
-          <div class="download-grid">
-            <a id="btn-macos" class="download-card" href="/releases/macos/HandLaunch-mac.dmg" data-os="macos">
+          <h2>Get Started</h2>
+          <p class="muted">Clone the repository and run HandLaunch directly from source. Your OS is detected automatically.</p>
+          <div class="command-grid">
+            <div id="command-macos" class="command-card" data-os="macos">
               <div class="card-icon"><img src="/assets/icons/apple.svg" alt="macOS" /></div>
               <div class="card-body">
                 <div class="card-title">macOS</div>
                 <div class="card-sub">Apple Silicon & Intel</div>
               </div>
-              <div class="card-cta">.dmg</div>
-            </a>
-            <a id="btn-windows" class="download-card" href="/releases/windows/HandLaunch-win.exe" data-os="windows">
+              <div class="command-container">
+                <code class="command-text" id="macos-command">cmd command</code>
+                <button class="copy-btn" onclick="copyCommand('macos-command')" title="Copy command">📋</button>
+              </div>
+            </div>
+            <div id="command-windows" class="command-card" data-os="windows">
               <div class="card-icon"><img src="/assets/icons/windows.svg" alt="Windows" /></div>
               <div class="card-body">
                 <div class="card-title">Windows</div>
                 <div class="card-sub">Windows 10/11</div>
               </div>
-              <div class="card-cta">.exe</div>
-            </a>
-            <a id="btn-linux" class="download-card" href="/releases/linux/HandLaunch-linux.AppImage" data-os="linux">
+              <div class="command-container">
+                <code class="command-text" id="windows-command">cmd command</code>
+                <button class="copy-btn" onclick="copyCommand('windows-command')" title="Copy command">📋</button>
+              </div>
+            </div>
+            <div id="command-linux" class="command-card" data-os="linux">
               <div class="card-icon"><img src="/assets/icons/linux.svg" alt="Linux" /></div>
               <div class="card-body">
                 <div class="card-title">Linux</div>
-                <div class="card-sub">AppImage or tar.gz</div>
+                <div class="card-sub">Ubuntu, Debian, Arch, etc.</div>
               </div>
-              <div class="card-cta">.AppImage</div>
-            </a>
-          </div>
-          
-          <div class="download-alternatives">
-            <h3>Alternative Downloads</h3>
-            <div class="alt-downloads">
-              <div class="alt-platform">
-                <h4>macOS</h4>
-                <div class="alt-links">
-                  <a href="/releases/macos/HandLaunch-mac.zip" class="alt-link">ZIP Archive</a>
-                </div>
-              </div>
-              <div class="alt-platform">
-                <h4>Windows</h4>
-                <div class="alt-links">
-                  <a href="/releases/windows/HandLaunch-win.zip" class="alt-link">ZIP Archive</a>
-                </div>
-              </div>
-              <div class="alt-platform">
-                <h4>Linux</h4>
-                <div class="alt-links">
-                  <a href="/releases/linux/HandLaunch-linux.tar.gz" class="alt-link">TAR.GZ Archive</a>
-                  <a href="/releases/linux/HandLaunch-linux" class="alt-link">Binary Executable</a>
-                </div>
+              <div class="command-container">
+                <code class="command-text" id="linux-command">cmd command</code>
+                <button class="copy-btn" onclick="copyCommand('linux-command')" title="Copy command">📋</button>
               </div>
             </div>
-          </div>
-          <div class="download-footnote small muted">
-            <p>Looking for older builds? <a href="https://github.com/soaravant/HandLaunch/releases" target="_blank" rel="noopener">See releases</a></p>
           </div>
         </div>
       </section>
@@ -168,55 +149,53 @@
         <div class="container">
           <h2>Built With</h2>
           <p class="muted">Interactive technology stack powering HandLaunch</p>
-          <div class="architecture-intro">
-            <p>HandLaunch's architecture follows a modular design where each component has a specific role in the gesture recognition pipeline. The system processes camera input through computer vision layers, applies machine learning for gesture classification, and integrates with the operating system for app launching. Click on any node to explore how it contributes to the overall system.</p>
-          </div>
           <div class="tech-canvas-container">
             <div class="canvas-controls">
               <button id="zoom-in" class="canvas-btn" title="Zoom In">+</button>
               <button id="zoom-out" class="canvas-btn" title="Zoom Out">−</button>
               <button id="reset-view" class="canvas-btn" title="Reset View">⌂</button>
+              <button id="toggle-categories" class="canvas-btn" title="Toggle Categories">📋</button>
             </div>
-            <canvas id="tech-canvas" width="900" height="700"></canvas>
+            <canvas id="tech-canvas" width="1000" height="800"></canvas>
             <div id="node-details" class="node-details hidden" aria-live="polite">
               <div class="node-title"></div>
               <div class="node-desc muted small"></div>
             </div>
-            <div class="canvas-instructions">
-              <p class="small muted">Use mouse wheel or buttons to zoom • Drag to pan • Click nodes for details</p>
-            </div>
-            <div class="tech-legend">
-              <h4>Technology Categories</h4>
-              <div class="legend-items">
-                <div class="legend-item">
-                  <span class="legend-emoji">🐍</span>
-                  <span class="legend-label">Core Language</span>
+            <div id="tech-categories" class="tech-categories">
+              <div class="categories-title">Technology Categories</div>
+              <div class="categories-list">
+                <div class="category-item">
+                  <span class="category-emoji">🐍</span>
+                  <span class="category-label">Core Language</span>
                 </div>
-                <div class="legend-item">
-                  <span class="legend-emoji">📷</span>
-                  <span class="legend-label">Computer Vision</span>
+                <div class="category-item">
+                  <span class="category-emoji">📷</span>
+                  <span class="category-label">Computer Vision</span>
                 </div>
-                <div class="legend-item">
-                  <span class="legend-emoji">🤖</span>
-                  <span class="legend-label">Machine Learning</span>
+                <div class="category-item">
+                  <span class="category-emoji">🤖</span>
+                  <span class="category-label">Machine Learning</span>
                 </div>
-                <div class="legend-item">
-                  <span class="legend-emoji">🖼️</span>
-                  <span class="legend-label">User Interface</span>
+                <div class="category-item">
+                  <span class="category-emoji">🖼️</span>
+                  <span class="category-label">User Interface</span>
                 </div>
-                <div class="legend-item">
-                  <span class="legend-emoji">🧮</span>
-                  <span class="legend-label">Data Processing</span>
+                <div class="category-item">
+                  <span class="category-emoji">🧮</span>
+                  <span class="category-label">Data Processing</span>
                 </div>
-                <div class="legend-item">
-                  <span class="legend-emoji">📦</span>
-                  <span class="legend-label">Build & Deploy</span>
+                <div class="category-item">
+                  <span class="category-emoji">📦</span>
+                  <span class="category-label">Build & Deploy</span>
                 </div>
-                <div class="legend-item">
-                  <span class="legend-emoji">⚙️</span>
-                  <span class="legend-label">System Integration</span>
+                <div class="category-item">
+                  <span class="category-emoji">⚙️</span>
+                  <span class="category-label">System Integration</span>
                 </div>
               </div>
+            </div>
+            <div class="canvas-instructions">
+              <p class="small muted">Use mouse wheel or buttons to zoom • Drag to pan • Click nodes for details • Toggle categories panel</p>
             </div>
           </div>
         </div>
@@ -230,7 +209,7 @@
           <span class="muted">© <span id="year"></span></span>
         </div>
         <div class="foot-right">
-          <a href="#download">Download</a>
+          <a href="#download">Get Started</a>
           <a href="#how-it-works">How it works</a>
           <a href="#built-with">Built With</a>
           <a href="https://github.com/soaravant/HandLaunch" target="_blank" rel="noopener">GitHub</a>
